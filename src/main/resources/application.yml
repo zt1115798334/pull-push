@@ -8,5 +8,5 @@ custom:
       key: zkdj_yuQing
       host: http://116.62.153.127:8199/river
       #      host: http://116.62.153.127:8585
-      app-id: $2y$10$0IOTn53Ps
+      app-id: 1231231
       full-query: /restserver/river/dataQuery
