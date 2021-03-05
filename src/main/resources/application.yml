@@ -1,0 +1,12 @@
+custom:
+  es:
+    version: 5
+    page-size: 500
+    file-path: D:\\test
+    analysis: http://127.0.0.1:8081/antest
+    es5: #es≈‰÷√–≈œ¢
+      key: zkdj_yuQing
+      host: http://116.62.153.127:8199/river
+      #      host: http://116.62.153.127:8585
+      app-id: $2y$10$0IOTn53Ps
+      full-query: /restserver/river/dataQuery
