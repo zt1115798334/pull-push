@@ -28,7 +28,7 @@ public class PushServiceImpl implements PushService {
     private final EsProperties esProperties;
 
     @Override
-    public void start() throws ExecutionException, InterruptedException {
+    public void start() {
         String analysis = esProperties.getAnalysis();
         FileUtils txt = new FileUtils(esProperties.getFilePath(), "txt");
         txt.File();
@@ -97,7 +97,8 @@ public class PushServiceImpl implements PushService {
             JSONObject params = new JSONObject();
             params.put("data", fileInfo.getContent());
             params.put("fileName", fileInfo.getFilename());
-            HttpClientUtils.getInstance().httpPostJson(url, params.getInnerMap());
+            String msg = HttpClientUtils.getInstance().httpPostJson(url, params.getInnerMap());
+            System.out.println("msg = " + msg);
             long end = System.currentTimeMillis();
             return end - start;
         }

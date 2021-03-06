@@ -4,7 +4,7 @@ custom:
     page-size: 500
     file-path: D:\\test
     analysis: http://127.0.0.1:8081/antest
-    es5: #esÅäÖÃĞÅÏ¢
+    es5: #esé…ç½®ä¿¡æ¯
       key: zkdj_yuQing
       host: http://116.62.153.127:8199/river
       #      host: http://116.62.153.127:8585
