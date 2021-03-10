@@ -1,12 +1,13 @@
 package com.example.pullpush.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.example.pullpush.analysis.service.AnalysisService;
+import com.example.pullpush.dto.FileInfoDto;
 import com.example.pullpush.properties.EsProperties;
 import com.example.pullpush.service.PushService;
+import com.example.pullpush.service.callable.SendInInterface;
 import com.example.pullpush.utils.FileUtils;
-import com.example.pullpush.utils.HttpClientUtils;
+import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,81 +28,61 @@ public class PushServiceImpl implements PushService {
 
     private final EsProperties esProperties;
 
+    private final AnalysisService analysisService;
+
+
     @Override
     public void start() {
-        String analysis = esProperties.getAnalysis();
         FileUtils txt = new FileUtils(esProperties.getFilePath(), "txt");
         txt.File();
         List<File> fileList = txt.getFileList().stream().filter(Objects::nonNull).collect(Collectors.toList());
         int fileSize = fileList.size();
         log.info("文件总数为：" + fileSize);
 
-        Queue<FileInfo> queue = new ConcurrentLinkedQueue<>();
+        Queue<FileInfoDto> queueRead = new ConcurrentLinkedQueue<>();
 
         final ExecutorService executorServiceReadSendFile = Executors.newFixedThreadPool(15);
         new Thread(() -> {
             try {
                 for (File file : fileList) {
-                    Future<FileInfo> submit = executorServiceReadSendFile.submit(new ReadFile(file));
-                    queue.add(submit.get());
+                    Future<FileInfoDto> submit = executorServiceReadSendFile.submit(new ReadFile(file));
+                    queueRead.add(submit.get());
                 }
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }).start();
 
+        Queue<Long> queueSend = new ConcurrentLinkedQueue<>();
+        RateLimiter rateLimiter = RateLimiter.create(100);
         new Thread(() -> {
-            while (true) {
-                while (!queue.isEmpty()) {
-                    FileInfo poll = queue.poll();
-                    Future<Long> submit = executorServiceReadSendFile.submit(new SendFile(analysis, poll));
+            try {
+                while (true) {
+                    while (!queueRead.isEmpty()) {
+                        FileInfoDto poll = queueRead.poll();
+                        Future<Long> submit = executorServiceReadSendFile.submit(new SendInInterface(rateLimiter, analysisService, poll));
+                        queueSend.add(submit.get());
+                    }
                 }
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
             }
         }).start();
         while (!executorServiceReadSendFile.isTerminated()) ;
         executorServiceReadSendFile.shutdown();
     }
 
-    @Data
     @AllArgsConstructor
-    static class FileInfo {
-
-        private final String filename;
-
-        private final String content;
-
-    }
-
-    @AllArgsConstructor
-    static class ReadFile implements Callable<FileInfo> {
+    static class ReadFile implements Callable<FileInfoDto> {
 
         private final File file;
 
         @Override
-        public FileInfo call() throws Exception {
+        public FileInfoDto call() throws Exception {
             String content = Files.lines(Paths.get(file.getPath()), Charset.defaultCharset()).collect(Collectors.joining(System.getProperty("line.separator")));
-            return new FileInfo(file.getName(), content);
+            return new FileInfoDto(file.getName(), content);
         }
     }
 
-    @AllArgsConstructor
-    static class SendFile implements Callable<Long> {
-
-        private final String url;
-
-        private final FileInfo fileInfo;
-
-        @Override
-        public Long call() {
-            long start = System.currentTimeMillis();
-            JSONObject params = new JSONObject();
-            params.put("data", fileInfo.getContent());
-            params.put("fileName", fileInfo.getFilename());
-            String msg = HttpClientUtils.getInstance().httpPostJson(url, params.getInnerMap());
-            System.out.println("msg = " + msg);
-            long end = System.currentTimeMillis();
-            return end - start;
-        }
-    }
 
 }

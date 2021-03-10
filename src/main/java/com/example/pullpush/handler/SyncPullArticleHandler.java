@@ -1,13 +1,19 @@
 package com.example.pullpush.handler;
 
-import com.example.pullpush.entity.GatherWordInfo;
+import com.alibaba.fastjson.JSONObject;
+import com.example.pullpush.base.handler.page.PageHandler;
+import com.example.pullpush.dto.GatherWordDto;
 import com.example.pullpush.enums.StorageMode;
+import com.example.pullpush.mysql.service.GatherWordsService;
+import com.example.pullpush.properties.CustomWordProperties;
 import com.example.pullpush.service.PullService;
 import com.example.pullpush.utils.MStringUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,17 +25,97 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class SyncPullArticleHandler {
 
-    @Component("customWords")
+    @Component("customWordsByDay")
     @AllArgsConstructor
-    public static class CustomWords {
+    public static class CustomWordsByDay {
+
+        private final PullService pullEsArticle;
+        private final CustomWordProperties customWordProperties;
+
+        public long handlerData(JSONObject extraParams) {
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
+            LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
+            List<String> gatherWords = customWordProperties.getWord().stream().map(MStringUtils::splitMinGranularityStr)
+                    .flatMap(Collection::stream)
+                    .distinct().collect(Collectors.toList());
+            return pullEsArticle.pullEsArticleByDay(storageMode, gatherWords, startDate, endDate, "custom");
+        }
+    }
+
+
+    @Component("gatherWordsByDay")
+    @AllArgsConstructor
+    public static class GatherWordsByDay extends PageHandler<GatherWordDto> {
 
         private final PullService pullEsArticle;
 
-        public long handlerData(StorageMode storageMode, List<String> wordList, LocalDate startDate, LocalDate endDate) {
-            List<GatherWordInfo> gatherWordInfos = wordList.stream().map(MStringUtils::splitMinGranularityStr)
+        private final GatherWordsService gatherWordsService;
+
+        @Override
+        protected long handleDataOfPerPage(List<GatherWordDto> list, int pageNumber, JSONObject extraParams) {
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
+            LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
+            List<String> gatherWords = list.stream().map(GatherWordDto::getName).collect(Collectors.toList());
+            return pullEsArticle.pullEsArticleByDay(storageMode, gatherWords, startDate, endDate, "gather");
+        }
+
+        @Override
+        protected Page<GatherWordDto> getPageList(int pageNumber, JSONObject extraParams) {
+            if (extraParams.getBoolean("status")) {
+                return gatherWordsService.findPageByEntityStatus(1L, pageNumber, DEFAULT_BATCH_SIZE);
+            } else {
+                return gatherWordsService.findPageByEntity(pageNumber, DEFAULT_BATCH_SIZE);
+            }
+        }
+    }
+
+    @Component("customWordsByTimeRange")
+    @AllArgsConstructor
+    public static class CustomWordsByTimeRange {
+
+        private final PullService pullEsArticle;
+
+        private final CustomWordProperties customWordProperties;
+
+        public long handlerData(JSONObject extraParams) {
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDateTime startDateTime = extraParams.getObject("startDateTime", LocalDateTime.class);
+            LocalDateTime endDateTime = extraParams.getObject("endDateTime", LocalDateTime.class);
+            String fromType = extraParams.getString("fromType");
+            List<String> gatherWords = customWordProperties.getWord().stream().map(MStringUtils::splitMinGranularityStr)
                     .flatMap(Collection::stream)
-                    .distinct().map(s -> GatherWordInfo.builder().name(s).build()).collect(Collectors.toList());
-            return pullEsArticle.pullEsArticle(storageMode, gatherWordInfos, startDate, endDate, "fromType");
+                    .distinct().collect(Collectors.toList());
+            return pullEsArticle.pullEsArticleByTimeRange(storageMode, gatherWords, startDateTime, endDateTime, fromType);
+        }
+    }
+
+    @Component("gatherWordsByTimeRange")
+    @AllArgsConstructor
+    public static class GatherWordsByTimeRange extends PageHandler<GatherWordDto> {
+
+        private final PullService pullEsArticle;
+
+        private final GatherWordsService gatherWordsService;
+
+        @Override
+        protected long handleDataOfPerPage(List<GatherWordDto> list, int pageNumber, JSONObject extraParams) {
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDateTime startDateTime = extraParams.getObject("startDateTime", LocalDateTime.class);
+            LocalDateTime endDateTime = extraParams.getObject("endDateTime", LocalDateTime.class);
+            String fromType = extraParams.getString("fromType");
+            List<String> gatherWords = list.stream().map(GatherWordDto::getName).collect(Collectors.toList());
+            return pullEsArticle.pullEsArticleByTimeRange(storageMode, gatherWords, startDateTime, endDateTime, fromType);
+        }
+
+        @Override
+        protected Page<GatherWordDto> getPageList(int pageNumber, JSONObject extraParams) {
+            if (extraParams.getBoolean("status")) {
+                return gatherWordsService.findPageByEntityStatus(1L, pageNumber, DEFAULT_BATCH_SIZE);
+            } else {
+                return gatherWordsService.findPageByEntity(pageNumber, DEFAULT_BATCH_SIZE);
+            }
         }
     }
 }

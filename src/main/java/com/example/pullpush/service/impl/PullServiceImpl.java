@@ -2,14 +2,18 @@ package com.example.pullpush.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.pullpush.analysis.service.AnalysisService;
 import com.example.pullpush.custom.CustomPage;
-import com.example.pullpush.entity.GatherWordInfo;
+import com.example.pullpush.dto.FileInfoDto;
 import com.example.pullpush.enums.StorageMode;
 import com.example.pullpush.es.domain.EsArticle;
 import com.example.pullpush.es.service.EsArticleService;
 import com.example.pullpush.properties.EsProperties;
 import com.example.pullpush.service.PullService;
+import com.example.pullpush.service.callable.SendInInterface;
 import com.example.pullpush.utils.DateUtils;
+import com.google.common.base.Objects;
+import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -38,17 +42,32 @@ public class PullServiceImpl implements PullService {
 
     private final EsProperties esProperties;
 
+    private final AnalysisService analysisService;
+
     @Override
-    public long pullEsArticle(StorageMode storageMode, List<GatherWordInfo> gatherWordInfos,
-                              LocalDate startDate, LocalDate endDate,
-                              String fromType) {
+    public long pullEsArticleByDay(StorageMode storageMode, List<String> gatherWords,
+                                   LocalDate startDate, LocalDate endDate,
+                                   String fromType) {
         ExecutorService executorService = Executors.newCachedThreadPool();
-        List<String> gatherWordInfo = gatherWordInfos.stream().map(GatherWordInfo::getName).collect(Collectors.toList());
-        JSONArray related = JSONArray.parseArray(JSONArray.toJSONString(gatherWordInfo));
+        JSONArray related = JSONArray.parseArray(JSONArray.toJSONString(gatherWords));
         List<LocalDate> localDates = DateUtils.dateRangeList(startDate, endDate);
         for (LocalDate localDate : localDates) {
-            executorService.submit(new PullArticleHandle(esArticleService, related, localDate, esProperties.getPageSize(), fromType, esProperties.getFilePath()));
+            String mapKey = "day_" + fromType + "_" + DateUtils.formatDate(localDate);
+            executorService.submit(new PullArticleHandle(storageMode, esArticleService, analysisService, related,
+                    localDate.atTime(LocalTime.of(0, 0, 0)),
+                    localDate.atTime(LocalTime.of(23, 59, 59)),
+                    esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
         }
+        executorService.shutdown();
+        return 0;
+    }
+
+    @Override
+    public long pullEsArticleByTimeRange(StorageMode storageMode, List<String> gatherWords, LocalDateTime startDateTime, LocalDateTime endDateTime, String fromType) {
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        JSONArray related = JSONArray.parseArray(JSONArray.toJSONString(gatherWords));
+        String mapKey = "timeRange_" + fromType;
+        executorService.submit(new PullArticleHandle(storageMode, esArticleService, analysisService, related, startDateTime, endDateTime, esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
         executorService.shutdown();
         return 0;
     }
@@ -57,15 +76,21 @@ public class PullServiceImpl implements PullService {
     @AllArgsConstructor
     public static class PullArticleHandle implements Callable<Long> {
 
+        private final StorageMode storageMode;
+
         private final EsArticleService esArticleService;
+
+        private final AnalysisService analysisService;
 
         private final JSONArray related;
 
-        private final LocalDate localDate;
+        private final LocalDateTime startDateTime;
+
+        private final LocalDateTime endDateTime;
 
         private final int pageSize;
 
-        private final String fromType;
+        private final String mapKey;
 
         private final String filePath;
 
@@ -76,10 +101,6 @@ public class PullServiceImpl implements PullService {
 
             ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<>(1000);
             AtomicInteger atomicInteger = new AtomicInteger();
-            String mapKey = fromType + DateUtils.formatDate(localDate);
-
-            LocalDateTime startDateTime = localDate.atTime(LocalTime.of(0, 0, 0));
-            LocalDateTime endDateTime = localDate.atTime(LocalTime.of(23, 59, 59));
 
             while (true) {
                 String scrollId = concurrentHashMap.getOrDefault(mapKey, StringUtils.EMPTY);
@@ -92,10 +113,15 @@ public class PullServiceImpl implements PullService {
                 if (allDataEsArticlePage.getTotalElements() == 0 || articleList.size() == 0) {
                     break;
                 }
+                RateLimiter rateLimiter = RateLimiter.create(100);
                 List<Future<Long>> futureList = articleList.stream().map(esArticle -> {
                     String ossPath = esArticle.getOssPath();
                     String fileName = ossPath.substring(ossPath.indexOf("_") + 1);
-                    return executorService.submit(new WriteInLocal(localDate, getArticleJson(esArticle), filePath, fileName, atomicInteger));
+                    FileInfoDto fileInfoDto = FileInfoDto.builder().filename(fileName).content(getArticleJson(esArticle)).build();
+                    Callable<Long> callable = Objects.equal(storageMode, StorageMode.LOCAL) ?
+                            new WriteInLocal(startDateTime.toLocalDate(), getArticleJson(esArticle), filePath, fileName, atomicInteger)
+                            : new SendInInterface(rateLimiter, analysisService, fileInfoDto);
+                    return executorService.submit(callable);
                 }).collect(Collectors.toList());
             }
             executorService.shutdown();
