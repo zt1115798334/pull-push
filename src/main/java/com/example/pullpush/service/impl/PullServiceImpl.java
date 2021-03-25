@@ -16,12 +16,14 @@ import com.google.common.base.Objects;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -196,16 +198,7 @@ public class PullServiceImpl implements PullService {
     }
 
     public static void main(String[] args) {
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        final LocalDate localDate = LocalDate.now();
-        final String articleJson = "fdafsafd";
-        final String filePath = "D:\\test\\数据";
-        final String fileName = "test.txt";
-        AtomicInteger atomicInteger = new AtomicInteger();
-        for (int i = 0; i < 1000; i++) {
-            executorService.submit(new WriteInLocal(localDate, articleJson, filePath, i + fileName, atomicInteger));
-
-        }
-        executorService.shutdown();
+        String x = "资助*& #40;学生+学校& #41;".replace(" ","");
+        System.out.println(StringEscapeUtils.unescapeHtml4(x));
     }
 }

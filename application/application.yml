@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: pull-push
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      connection-timeout: 30000
+      max-lifetime: 1800000
+  jpa:
+    database: MYSQL
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+  quartz:
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: clusteredScheduler
+            instanceId: AUTO
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+    job-store-type: MEMORY
+custom:
+  custom-word:
+    word: ${CUSTOM_CUSTOM_WORD_WORD}
+  es:
+    version: 5
+    page-size: ${CUSTOM_ES_PAGE_SIZE}
+    file-path: D:\\test
+    analysis: ${CUSTOM_ES_ANALYSIS}
+    es5:
+      key: ${CUSTOM_ES_ES5_KEY}
+      host: ${CUSTOM_ES_ES5_HOST}
+      app-id: 1231231
+      full-query: /restserver/river/dataQuery
+  quartz:
+    corn: ${CUSTOM_QUARTZ_CORN}
+    time-type: ${CUSTOM_QUARTZ_TIME_TYPE}
+    time-range: ${CUSTOM_QUARTZ_TIME_RANGE}
+    job-Type: ${CUSTOM_QUARTZ_JOB_TYPE}
