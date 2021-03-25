@@ -32,11 +32,11 @@ import java.util.List;
 @RequestMapping("api")
 public class PullController extends BaseResultMessage {
 
-    @Resource(name = "customWordsByDay")
-    private final SyncPullArticleHandler.CustomWordsByDay customWordsByDay;
+    @Resource(name = "customWordsByDateRange")
+    private final SyncPullArticleHandler.CustomWordsByDateRange customWordsByDateRange;
 
-    @Resource(name = "gatherWordsByDay")
-    private final SyncPullArticleHandler.GatherWordsByDay gatherWordsByDay;
+    @Resource(name = "gatherWordsByDateRange")
+    private final SyncPullArticleHandler.GatherWordsByDateRange gatherWordsByDateRange;
 
     @GetMapping("pullArticleOfCustomWords")
     public ResultMessage pullArticleOfCustomWords(@DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
@@ -47,7 +47,7 @@ public class PullController extends BaseResultMessage {
         extraParams.put("storageMode", StorageMode.LOCAL);
         extraParams.put("startDate", startDate);
         extraParams.put("endDate", endDate);
-        long handlerData = customWordsByDay.handlerData(extraParams);
+        long handlerData = customWordsByDateRange.handlerData(extraParams);
         return success(handlerData);
     }
 
@@ -58,7 +58,7 @@ public class PullController extends BaseResultMessage {
         extraParams.put("startDate", startDate);
         extraParams.put("endDate", endDate);
         extraParams.put("status", status);
-        gatherWordsByDay.handle(extraParams);
+        gatherWordsByDateRange.handle(extraParams);
         return success();
     }
 

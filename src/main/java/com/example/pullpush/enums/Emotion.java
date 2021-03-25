@@ -12,7 +12,7 @@ public enum Emotion {
     NEUTRAL("neutral", "中性"),
     IRRELEVANT("irrelevant", "无关");
 
-    private String type;
-    private String name;
+    private final String type;
+    private final String name;
 
 }

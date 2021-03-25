@@ -11,7 +11,7 @@ public enum ArticleType {
     COMMENT(1, "comment", "评论"),
     TRADITION(99, "tradition", "传统文章");
 
-    private Integer code;
-    private String type;
-    private String name;
+    private final Integer code;
+    private final String type;
+    private final String name;
 }

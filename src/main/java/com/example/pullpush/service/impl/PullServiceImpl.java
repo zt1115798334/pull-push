@@ -45,9 +45,9 @@ public class PullServiceImpl implements PullService {
     private final AnalysisService analysisService;
 
     @Override
-    public long pullEsArticleByDay(StorageMode storageMode, List<String> gatherWords,
-                                   LocalDate startDate, LocalDate endDate,
-                                   String fromType) {
+    public long pullEsArticleByDateRange(StorageMode storageMode, List<String> gatherWords,
+                                         LocalDate startDate, LocalDate endDate,
+                                         String fromType) {
         ExecutorService executorService = Executors.newCachedThreadPool();
         JSONArray related = JSONArray.parseArray(JSONArray.toJSONString(gatherWords));
         List<LocalDate> localDates = DateUtils.dateRangeList(startDate, endDate);

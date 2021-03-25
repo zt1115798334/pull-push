@@ -44,9 +44,22 @@ custom:
     es5: #es配置信息
       key: zkdj_yuQing
       host: http://116.62.153.127:8199/river
-      #      host: http://116.62.153.127:8585
       app-id: 1231231
       full-query: /restserver/river/dataQuery
   quartz:
-    corn: 0 0/1 * * * ?
-    time: -1
+#    每隔5秒执行一次：*/5 * * * * ?
+#    每隔1分钟执行一次：0 */1 * * * ?
+#    每天23点执行一次：0 0 23 * * ?
+#    每天凌晨1点执行一次：0 0 1 * * ?
+#    每月1号凌晨1点执行一次：0 0 1 1 * ?
+#    每月最后一天23点执行一次：0 0 23 L * ?
+#    每周星期天凌晨1点实行一次：0 0 1 ? * L
+#    在26分、29分、33分执行一次：0 26,29,33 * * * ?
+#    每天的0点、13点、18点、21点都执行一次：0 0 0,13,18,21 * * ?
+    corn: 0 */1 * * * ?
+#    YEAR, MONTH, DAY, HOUR, MINUTE, SECOND,
+    time-type: HOUR
+    #    开始时间提前多少 需要跟corn对应
+    time-range: -1
+#    CUSTOM(自定义词) GATHER（词库中gather表）
+    job-Type: GATHER

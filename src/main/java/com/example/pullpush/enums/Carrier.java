@@ -23,10 +23,10 @@ public enum Carrier {
     CARRIER_ABROAD_TWITTER("twitter", 3001, "Twitter", "Twitter"),
     CARRIER_ABROAD_FACEBOOK("facebook", 3002, "Facebook", "Facebook");
 
-    private String type;
-    private Integer code;
-    private String name;
-    private String abroadName;
+    private final String type;
+    private final Integer code;
+    private final String name;
+    private  String abroadName;
 
     Carrier(String type, Integer code, String name) {
         this.type = type;

@@ -9,6 +9,7 @@ import com.example.pullpush.properties.CustomWordProperties;
 import com.example.pullpush.service.PullService;
 import com.example.pullpush.utils.MStringUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -21,32 +22,34 @@ import java.util.stream.Collectors;
 /**
  * Created by fan on 7/29/20.
  */
+@Slf4j
 @Component
 @AllArgsConstructor
 public class SyncPullArticleHandler {
 
-    @Component("customWordsByDay")
+    @Component("customWordsByDateRange")
     @AllArgsConstructor
-    public static class CustomWordsByDay {
+    public static class CustomWordsByDateRange {
 
         private final PullService pullEsArticle;
         private final CustomWordProperties customWordProperties;
 
         public long handlerData(JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
             StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
             LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
             LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
             List<String> gatherWords = customWordProperties.getWord().stream().map(MStringUtils::splitMinGranularityStr)
                     .flatMap(Collection::stream)
                     .distinct().collect(Collectors.toList());
-            return pullEsArticle.pullEsArticleByDay(storageMode, gatherWords, startDate, endDate, "custom");
+            return pullEsArticle.pullEsArticleByDateRange(storageMode, gatherWords, startDate, endDate, "custom");
         }
     }
 
 
-    @Component("gatherWordsByDay")
+    @Component("gatherWordsByDateRange")
     @AllArgsConstructor
-    public static class GatherWordsByDay extends PageHandler<GatherWordDto> {
+    public static class GatherWordsByDateRange extends PageHandler<GatherWordDto> {
 
         private final PullService pullEsArticle;
 
@@ -54,11 +57,12 @@ public class SyncPullArticleHandler {
 
         @Override
         protected long handleDataOfPerPage(List<GatherWordDto> list, int pageNumber, JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
             StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
             LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
             LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
             List<String> gatherWords = list.stream().map(GatherWordDto::getName).collect(Collectors.toList());
-            return pullEsArticle.pullEsArticleByDay(storageMode, gatherWords, startDate, endDate, "gather");
+            return pullEsArticle.pullEsArticleByDateRange(storageMode, gatherWords, startDate, endDate, "gather");
         }
 
         @Override
@@ -80,6 +84,7 @@ public class SyncPullArticleHandler {
         private final CustomWordProperties customWordProperties;
 
         public long handlerData(JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
             StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
             LocalDateTime startDateTime = extraParams.getObject("startDateTime", LocalDateTime.class);
             LocalDateTime endDateTime = extraParams.getObject("endDateTime", LocalDateTime.class);
@@ -101,6 +106,8 @@ public class SyncPullArticleHandler {
 
         @Override
         protected long handleDataOfPerPage(List<GatherWordDto> list, int pageNumber, JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
+            log.info("GatherWordDto:{}", list);
             StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
             LocalDateTime startDateTime = extraParams.getObject("startDateTime", LocalDateTime.class);
             LocalDateTime endDateTime = extraParams.getObject("endDateTime", LocalDateTime.class);

@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface PullService {
 
-    long pullEsArticleByDay(StorageMode storageMode, List<String> gatherWords, LocalDate startDate, LocalDate endDate, String fromType);
+    long pullEsArticleByDateRange(StorageMode storageMode, List<String> gatherWords, LocalDate startDate, LocalDate endDate, String fromType);
 
     long pullEsArticleByTimeRange(StorageMode storageMode, List<String> gatherWords, LocalDateTime startDateTime, LocalDateTime endDateTime, String fromType);
 }
