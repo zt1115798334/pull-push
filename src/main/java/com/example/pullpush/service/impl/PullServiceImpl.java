@@ -11,23 +11,15 @@ import com.example.pullpush.es.service.EsArticleService;
 import com.example.pullpush.properties.EsProperties;
 import com.example.pullpush.service.PullService;
 import com.example.pullpush.service.callable.SendInInterface;
+import com.example.pullpush.service.callable.WriteInLocal;
 import com.example.pullpush.utils.DateUtils;
 import com.google.common.base.Objects;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -76,6 +68,7 @@ public class PullServiceImpl implements PullService {
 
 
     @AllArgsConstructor
+    @Slf4j
     public static class PullArticleHandle implements Callable<Long> {
 
         private final StorageMode storageMode;
@@ -104,7 +97,14 @@ public class PullServiceImpl implements PullService {
             ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<>(1000);
             AtomicInteger atomicInteger = new AtomicInteger();
 
+            long executionStart = System.currentTimeMillis();
             while (true) {
+
+                long runStart = System.currentTimeMillis();
+                long maxRequestTime = Long.MIN_VALUE;
+                long minRequestTime = Long.MAX_VALUE;
+                long totalRequestTime = 0;
+
                 String scrollId = concurrentHashMap.getOrDefault(mapKey, StringUtils.EMPTY);
                 CustomPage<EsArticle> allDataEsArticlePage = esArticleService.findAllDataEsArticlePage(related, scrollId,
                         startDateTime, endDateTime, pageSize);
@@ -125,48 +125,37 @@ public class PullServiceImpl implements PullService {
                             : new SendInInterface(rateLimiter, analysisService, fileInfoDto);
                     return executorService.submit(callable);
                 }).collect(Collectors.toList());
+
+                long runEnd = System.currentTimeMillis();
+                long second = ((runEnd - runStart) / 1000);
+
+                for (Future<Long> future : futureList) {
+                    try {
+                        long time = future.get();
+                        totalRequestTime += time;
+                        if (time > maxRequestTime) {
+                            maxRequestTime = time;
+                        }
+                        if (time < minRequestTime) {
+                            minRequestTime = time;
+                        }
+                    } catch (Exception e) {
+                        log.error("exception in getting results: {}", e.getMessage());
+                        future.cancel(true);
+                    }
+                }
+                log.info("average qps: {}, " +
+                                "average latency: {} ms," +
+                                "maximum latency: {} ms, " +
+                                "minimum latency: {} ms",
+                        articleList.size() / (second == 0 ? 1 : second),
+                        totalRequestTime / articleList.size(),
+                        maxRequestTime,
+                        minRequestTime);
             }
             executorService.shutdown();
-            return null;
-        }
-    }
-
-    @Slf4j
-    @AllArgsConstructor
-    public static class WriteInLocal implements Callable<Long> {
-
-        private final LocalDate localDate;
-
-        private final String articleJson;
-
-        private final String filePath;
-
-        private final String fileName;
-
-        private final AtomicInteger atomicInteger;
-
-        @Override
-        public Long call() {
-            String formatDate = DateUtils.formatDate(localDate);
-
-            String fileNum = String.valueOf(atomicInteger.getAndIncrement() % 10);
-            String realPath = filePath + File.separator + formatDate + File.separator + fileNum + File.separator;
-            File file = new File(realPath);
-            if (!file.exists()) {
-                boolean mkdirs = file.mkdirs();
-                if (mkdirs) {
-                    log.info("路径：{},不存在，现在创建完成", realPath);
-                }
-            }
-            Path path = Paths.get(realPath + File.separator + fileName);
-            try (BufferedWriter writer =
-                         Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-                writer.write(articleJson);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
+            long executionEnd = System.currentTimeMillis();
+            log.info("executor time: {}ms", (executionEnd - executionStart));
             return null;
         }
     }

@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @author zhang tong
  * date: 2018/8/20 9:48
- * description: 应用中心
+ * description:
  */
 
 @AllArgsConstructor
