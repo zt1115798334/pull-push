@@ -16,4 +16,5 @@ public class QuartzProperties {
     private TimeType timeType;
     private Integer timeRange;
     private JobType jobType;
+    private Boolean state;
 }

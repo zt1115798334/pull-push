@@ -197,8 +197,4 @@ public class PullServiceImpl implements PullService {
         return params.toJSONString();
     }
 
-    public static void main(String[] args) {
-        String x = "资助*& #40;学生+学校& #41;".replace(" ","");
-        System.out.println(StringEscapeUtils.unescapeHtml4(x));
-    }
 }

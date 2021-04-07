@@ -78,10 +78,12 @@ public class QuartzConfig {
         // 延时启动，应用启动1秒后
         bean.setStartupDelay(1);
         // 注册触发器
-        if (Objects.equal(quartzProperties.getJobType(), JobType.GATHER)) {
-            bean.setTriggers(syncPullArticleOfGatherTrigger);
-        }else{
-            bean.setTriggers(syncPullArticleOfCustomTrigger);
+        if (quartzProperties.getState()){
+            if (Objects.equal(quartzProperties.getJobType(), JobType.GATHER)) {
+                bean.setTriggers(syncPullArticleOfGatherTrigger);
+            }else{
+                bean.setTriggers(syncPullArticleOfCustomTrigger);
+            }
         }
         return bean;
     }

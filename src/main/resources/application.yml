@@ -3,9 +3,9 @@ spring:
     name: pull-push
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://rm-bp1d3ra3968332d9ixo.mysql.rds.aliyuncs.com:3306/ptest?characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&&serverTimezone=UTC
-    username: pmptest
-    password: zkdj_yqgj2)!&
+    url: jdbc:mysql://127.0.0.1:3306/thesaurus?characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&&serverTimezone=UTC
+    username: root
+    password: root
     hikari:
       connection-timeout: 30000
       max-lifetime: 1800000
@@ -63,3 +63,5 @@ custom:
     time-range: -1
 #    CUSTOM(自定义词) GATHER（词库中gather表）
     job-Type: GATHER
+#    true 开启  false 关闭
+    state: false

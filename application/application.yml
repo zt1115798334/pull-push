@@ -46,3 +46,4 @@ custom:
     time-type: ${CUSTOM_QUARTZ_TIME_TYPE}
     time-range: ${CUSTOM_QUARTZ_TIME_RANGE}
     job-Type: ${CUSTOM_QUARTZ_JOB_TYPE}
+    state: ${CUSTOM_QUARTZ_STATE}
