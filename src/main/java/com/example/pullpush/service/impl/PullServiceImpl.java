@@ -13,6 +13,7 @@ import com.example.pullpush.service.PullService;
 import com.example.pullpush.service.callable.SendInInterface;
 import com.example.pullpush.service.callable.WriteInLocal;
 import com.example.pullpush.utils.DateUtils;
+import com.example.pullpush.utils.TheadUtils;
 import com.google.common.base.Objects;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -45,15 +47,15 @@ public class PullServiceImpl implements PullService {
         ExecutorService executorService = Executors.newCachedThreadPool();
         JSONArray related = JSONArray.parseArray(JSONArray.toJSONString(gatherWords));
         List<LocalDate> localDates = DateUtils.dateRangeList(startDate, endDate);
-        for (LocalDate localDate : localDates) {
+        List<Future<Long>> collect = localDates.stream().map(localDate -> {
             String mapKey = "day_" + fromType + "_" + DateUtils.formatDate(localDate);
-            executorService.submit(new PullArticleHandle(storageMode, esArticleService, analysisService, related,
+            return executorService.submit(new PullArticleHandle(storageMode, esArticleService, analysisService, related,
                     localDate.atTime(LocalTime.of(0, 0, 0)),
                     localDate.atTime(LocalTime.of(23, 59, 59)),
                     esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
-        }
+        }).collect(Collectors.toList());
         executorService.shutdown();
-        return 0;
+        return collect.stream().map(TheadUtils::getFutureLong).mapToLong(Long::longValue).sum();
     }
 
     @Override
@@ -61,9 +63,9 @@ public class PullServiceImpl implements PullService {
         ExecutorService executorService = Executors.newCachedThreadPool();
         JSONArray related = JSONArray.parseArray(JSONArray.toJSONString(gatherWords));
         String mapKey = "timeRange_" + fromType;
-        executorService.submit(new PullArticleHandle(storageMode, esArticleService, analysisService, related, startDateTime, endDateTime, esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
+        Future<Long> submit = executorService.submit(new PullArticleHandle(storageMode, esArticleService, analysisService, related, startDateTime, endDateTime, esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
         executorService.shutdown();
-        return 0;
+        return TheadUtils.getFutureLong(submit);
     }
 
 
@@ -98,8 +100,8 @@ public class PullServiceImpl implements PullService {
             AtomicInteger atomicInteger = new AtomicInteger();
 
             long executionStart = System.currentTimeMillis();
+            AtomicLong atomicLong = new AtomicLong();
             while (true) {
-
                 long runStart = System.currentTimeMillis();
                 long maxRequestTime = Long.MIN_VALUE;
                 long minRequestTime = Long.MAX_VALUE;
@@ -112,7 +114,9 @@ public class PullServiceImpl implements PullService {
                     concurrentHashMap.put(mapKey, allDataEsArticlePage.getScrollId());
                 }
                 List<EsArticle> articleList = allDataEsArticlePage.getList();
-                if (allDataEsArticlePage.getTotalElements() == 0 || articleList.size() == 0) {
+                int articleSize = articleList.size();
+                atomicLong.addAndGet(articleSize);
+                if (allDataEsArticlePage.getTotalElements() == 0 || articleSize == 0) {
                     break;
                 }
                 RateLimiter rateLimiter = RateLimiter.create(100);
@@ -130,33 +134,28 @@ public class PullServiceImpl implements PullService {
                 long second = ((runEnd - runStart) / 1000);
 
                 for (Future<Long> future : futureList) {
-                    try {
-                        long time = future.get();
-                        totalRequestTime += time;
-                        if (time > maxRequestTime) {
-                            maxRequestTime = time;
-                        }
-                        if (time < minRequestTime) {
-                            minRequestTime = time;
-                        }
-                    } catch (Exception e) {
-                        log.error("exception in getting results: {}", e.getMessage());
-                        future.cancel(true);
+                    long time = TheadUtils.getFutureLong(future);
+                    totalRequestTime += time;
+                    if (time > maxRequestTime) {
+                        maxRequestTime = time;
+                    }
+                    if (time < minRequestTime) {
+                        minRequestTime = time;
                     }
                 }
                 log.info("average qps: {}, " +
                                 "average latency: {} ms," +
                                 "maximum latency: {} ms, " +
                                 "minimum latency: {} ms",
-                        articleList.size() / (second == 0 ? 1 : second),
-                        totalRequestTime / articleList.size(),
+                        articleSize / (second == 0 ? 1 : second),
+                        totalRequestTime / articleSize,
                         maxRequestTime,
                         minRequestTime);
             }
             executorService.shutdown();
             long executionEnd = System.currentTimeMillis();
             log.info("executor time: {}ms", (executionEnd - executionStart));
-            return null;
+            return atomicLong.get();
         }
     }
 
