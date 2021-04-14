@@ -1,5 +1,6 @@
 package com.example.pullpush.properties;
 
+import com.example.pullpush.enums.ReadModel;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -26,7 +27,10 @@ public class EsProperties {
 
     private String analysis;
 
+    private ReadModel readModel;
+
     private EsInfo es5;
+
 
     @Getter
     @Setter

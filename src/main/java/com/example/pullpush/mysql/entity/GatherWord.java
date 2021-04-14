@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
  * @author fan
  *
  */
-@SuppressWarnings("serial")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity

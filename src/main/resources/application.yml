@@ -40,6 +40,7 @@ custom:
     version: 5
     page-size: 500
     file-path: D:\\test
+    read-model: DB
     analysis: http://127.0.0.1:8081
     es5: #es配置信息
       key: zkdj_yuQing

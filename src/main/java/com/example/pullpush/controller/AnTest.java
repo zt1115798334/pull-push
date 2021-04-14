@@ -12,11 +12,11 @@ public class AnTest extends BaseResultMessage {
     @PostMapping("/analysis/analysis/put")
     public ResultMessage analysis(@RequestParam String data, @RequestParam String fileName) {
         System.out.println("fileName = " + fileName);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         return success();
     }
 }

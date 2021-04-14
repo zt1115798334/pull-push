@@ -34,7 +34,8 @@ custom:
   es:
     version: 5
     page-size: ${CUSTOM_ES_PAGE_SIZE}
-    file-path: D:\\test
+    file-path: ${CUSTOM_ES_FILE_PATH}
+    read-model: ${CUSTOM_ES_READ_MODEL}
     analysis: ${CUSTOM_ES_ANALYSIS}
     es5:
       key: ${CUSTOM_ES_ES5_KEY}
