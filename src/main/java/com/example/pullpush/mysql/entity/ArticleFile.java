@@ -3,9 +3,9 @@ package com.example.pullpush.mysql.entity;
 import com.example.pullpush.base.entity.IdEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.Transient;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
@@ -13,23 +13,20 @@ import java.time.LocalDateTime;
  *
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "t_test")
-public class ArticleFile extends IdEntity {
-	/**
-     * 采集词id
-     */
-    private Long id;
-
+@Table(name = "rencai_zhengce")
+public class ArticleFile{
     /**
-     * 词库id
+     * 主键
      */
-    private String fileName;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private String id;
 
     /**
      * 词类别
      */
+    @Column(name = "JsonData")
     private String fileContext;
 
 }

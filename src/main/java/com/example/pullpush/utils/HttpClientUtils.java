@@ -162,7 +162,7 @@ public class HttpClientUtils {
     private String httpRequest(String url, Map<String, String> headerMap, Map<String, Object> paramMap, Charset charset, int reTry, HttpMethod httpMethod, String mediaType) {
         long startTime = System.currentTimeMillis();
         String paramJson = JSONObject.parseObject(JSON.toJSONString(paramMap, SerializerFeature.DisableCircularReferenceDetect)).toJSONString();
-        log.info("请求URl：{},请求Method：{},请求头：{}，请求内容：{}", url, httpMethod.toString(), headerMap, paramJson.length() > 5000 ? "" : paramJson);
+//        log.info("请求URl：{},请求Method：{},请求头：{}，请求内容：{}", url, httpMethod.toString(), headerMap, paramJson.length() > 5000 ? "" : paramJson);
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         String result = null;
@@ -188,7 +188,7 @@ public class HttpClientUtils {
                 long executeStartTime = System.currentTimeMillis();
                 // 执行请求访问
                 response = httpClient.execute(httpPost);
-                log.info("执行请求响应时间：{}", (System.currentTimeMillis() - executeStartTime));
+//                log.info("执行请求响应时间：{}", (System.currentTimeMillis() - executeStartTime));
             }
             if (response != null) {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -218,7 +218,7 @@ public class HttpClientUtils {
         } finally {
             close(response);
             close(httpClient);
-            log.info("Request URL：{},响应时间：{}", url, (System.currentTimeMillis() - startTime));
+//            log.info("Request URL：{},响应时间：{}", url, (System.currentTimeMillis() - startTime));
         }
         return result;
     }

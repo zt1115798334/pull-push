@@ -13,7 +13,9 @@ spring:
     database: MYSQL
     hibernate:
       ddl-auto: none
-    show-sql: false
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
     open-in-view: false
   quartz:
     #相关属性配置
@@ -62,7 +64,7 @@ custom:
     time-type: HOUR
     #    开始时间提前多少 需要跟corn对应
     time-range: -1
-#    CUSTOM(自定义词) GATHER（词库中gather表）
-    job-Type: GATHER
+#    CUSTOM(自定义词) GATHER（词库中gather表） PUSH 推送
+    job-Type: PUSH
 #    true 开启  false 关闭
     state: false

@@ -6,8 +6,8 @@ import com.example.pullpush.mysql.repo.ArticleFileRepository;
 import com.example.pullpush.mysql.service.ArticleFileService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 @Service
@@ -17,7 +17,7 @@ public class ArticleFileServiceImpl implements ArticleFileService {
 
     @Override
     public Page<ArticleFile> findPage(int pageNumber, int pageSize) {
-        return articleFileRepository.findAll((root, query, builder) -> null,PageUtils.buildPageRequest(pageNumber, pageSize));
+        return articleFileRepository.findAll((root, query, builder) -> null, PageUtils.buildPageRequest(pageNumber, pageSize));
     }
 
     @Override
@@ -25,8 +25,10 @@ public class ArticleFileServiceImpl implements ArticleFileService {
         return articleFileRepository.count();
     }
 
+    @Transactional
     @Override
     public void truncateTable() {
-        articleFileRepository.truncateTable();
+        System.out.println("开始清理表信息");
+//        articleFileRepository.truncateTable();
     }
 }

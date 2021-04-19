@@ -4,6 +4,7 @@ import com.example.pullpush.enums.JobType;
 import com.example.pullpush.properties.QuartzProperties;
 import com.example.pullpush.quartz.job.SyncPullArticleOfCustomJob;
 import com.example.pullpush.quartz.job.SyncPullArticleOfGatherJob;
+import com.example.pullpush.quartz.job.SyncPushArticleJob;
 import com.google.common.base.Objects;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
@@ -72,17 +73,45 @@ public class QuartzConfig {
         return cronTriggerFactoryBean;
     }
 
+    @Bean(name = "syncPushArticleJobDetail")
+    public MethodInvokingJobDetailFactoryBean syncPushArticleJobDetail(SyncPushArticleJob syncPushArticleJob) {
+        MethodInvokingJobDetailFactoryBean jobDetail = new MethodInvokingJobDetailFactoryBean();
+        // 是否并发执行
+        jobDetail.setConcurrent(false);
+        // 为需要执行的实体类对应的对象
+        jobDetail.setTargetObject(syncPushArticleJob);
+        // 需要执行的方法
+        jobDetail.setTargetMethod("execute");
+        return jobDetail;
+    }
+
+    @Bean(name = "syncPushArticleTrigger")
+    public CronTriggerFactoryBean syncPushArticleTrigger(JobDetail syncPushArticleJobDetail) {
+        CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
+        // 设置jobDetail
+        cronTriggerFactoryBean.setJobDetail(syncPushArticleJobDetail);
+        //秒 分 小时 日 月 星期 年  每10分钟
+        cronTriggerFactoryBean.setCronExpression(quartzProperties.getCorn());//"0 0/30 * * * ?"
+        //trigger超时处理策略 默认1：总是会执行头一次 2:不处理
+        cronTriggerFactoryBean.setMisfireInstruction(2);
+        return cronTriggerFactoryBean;
+    }
+
     @Bean(name = "schedulerFactory")
-    public SchedulerFactoryBean schedulerFactory(Trigger syncPullArticleOfCustomTrigger, Trigger syncPullArticleOfGatherTrigger) {
+    public SchedulerFactoryBean schedulerFactory(Trigger syncPullArticleOfCustomTrigger,
+                                                 Trigger syncPullArticleOfGatherTrigger,
+                                                 Trigger syncPushArticleTrigger) {
         SchedulerFactoryBean bean = new SchedulerFactoryBean();
         // 延时启动，应用启动1秒后
         bean.setStartupDelay(1);
         // 注册触发器
-        if (quartzProperties.getState()){
+        if (quartzProperties.getState()) {
             if (Objects.equal(quartzProperties.getJobType(), JobType.GATHER)) {
                 bean.setTriggers(syncPullArticleOfGatherTrigger);
-            }else{
+            } else if (Objects.equal(quartzProperties.getJobType(), JobType.CUSTOM)) {
                 bean.setTriggers(syncPullArticleOfCustomTrigger);
+            } else {
+                bean.setTriggers(syncPushArticleTrigger);
             }
         }
         return bean;
