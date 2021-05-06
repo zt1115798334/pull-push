@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.example.pullpush.custom.CustomPage;
+import com.example.pullpush.enums.SearchModel;
 import com.example.pullpush.es.domain.EsArticle;
 import com.example.pullpush.es.service.EsArticleService;
 import com.example.pullpush.es.service.EsInterfaceService;
 import com.example.pullpush.utils.ArticleUtils;
 import com.example.pullpush.utils.EsParamsUtils;
+import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -74,11 +76,17 @@ public class EsArticleServiceImpl implements EsArticleService {
     }
 
     @Override
-    public CustomPage<EsArticle> findAllDataEsArticlePage(JSONArray related,
+    public CustomPage<EsArticle> findAllDataEsArticlePage(SearchModel searchModel, JSONArray wordJa,
                                                           String scrollId,
                                                           LocalDateTime startDateTime, LocalDateTime endDateTime,
                                                           int pageSize) {
-        JSONObject params = EsParamsUtils.getQueryParams(related);
+        System.out.println("searchModel = " + searchModel);
+        JSONObject params = new JSONObject();
+        if (Objects.equal(searchModel, SearchModel.RELATED_WORDS)) {
+            params.putAll(EsParamsUtils.getQueryParams(wordJa));
+        } else if (Objects.equal(searchModel, SearchModel.AUTHOR)) {
+            params.putAll(EsParamsUtils.getQueryAuthor(wordJa));
+        }
         params.putAll(EsParamsUtils.getQueryScrollIdParams(scrollId));
         params.putAll(EsParamsUtils.getQueryTimeParams(startDateTime, endDateTime));
         params.put("searchType", "all");

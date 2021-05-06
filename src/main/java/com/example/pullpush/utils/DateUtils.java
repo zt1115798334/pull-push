@@ -1,5 +1,8 @@
 package com.example.pullpush.utils;
 
+import com.alibaba.fastjson.JSONObject;
+import com.example.pullpush.enums.TimeType;
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
@@ -646,6 +649,35 @@ public class DateUtils {
         return endDate.toEpochDay() - startDate.toEpochDay();
     }
 
+    public static DateRange intervalTimeCoverTimeType(TimeType timeType, Integer timeRange) {
+        if (Objects.equal(timeType, TimeType.YEAR) ||
+                Objects.equal(timeType, TimeType.MONTH) ||
+                Objects.equal(timeType, TimeType.DAY)) {
+            LocalDate localDate = DateUtils.currentDate();
+            LocalDate startDate = localDate;
+            if (Objects.equal(timeType, TimeType.YEAR)) {
+                startDate = localDate.plusYears(timeRange);
+            } else if (Objects.equal(timeType, TimeType.MONTH)) {
+                startDate = localDate.plusMonths(timeRange);
+            } else if (Objects.equal(timeType, TimeType.DAY)) {
+                startDate = localDate.plusDays(timeRange);
+            }
+            return DateRange.getIns(startDate, localDate);
+
+        } else {
+            LocalDateTime localDateTime = DateUtils.currentDateTime();
+            LocalDateTime startDateTime = localDateTime;
+            if (Objects.equal(timeType, TimeType.HOUR)) {
+                startDateTime = localDateTime.plusHours(timeRange);
+            } else if (Objects.equal(timeType, TimeType.MINUTE)) {
+                startDateTime = localDateTime.plusMinutes(timeRange);
+            } else if (Objects.equal(timeType, TimeType.SECOND)) {
+                startDateTime = localDateTime.plusSeconds(timeRange);
+            }
+            return DateRange.getIns(startDateTime, localDateTime);
+        }
+    }
+
 
     @Setter
     @Getter
@@ -672,6 +704,22 @@ public class DateUtils {
                 dr.endDateTime = endDateTime;
                 dr.startDate = startDateTime.toLocalDate();
                 dr.endDate = endDateTime.toLocalDate();
+            }
+            return dr;
+        }
+
+        static DateRange getIns(LocalDate startDate,
+                                LocalDate endDate) {
+            DateRange dr = new DateRange();
+            if (startDate != null && endDate != null) {
+                LocalDateTime startDateTime = startDate.atTime(LocalTime.of(0, 0, 0));
+                LocalDateTime endDateTime = endDate.atTime(LocalTime.of(23, 59, 59));
+                dr.startDateTimeStr = formatDateTime(startDateTime);
+                dr.endDateTimeStr = formatDateTime(endDateTime);
+                dr.startDate = startDate;
+                dr.endDate = endDate;
+                dr.startDateTime = startDateTime;
+                dr.endDateTime = endDateTime;
             }
             return dr;
         }

@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @Component
 @EnableScheduling
-public class SyncPullArticleOfCustomJob {
+public class SyncPullArticleOfCustomWordJob {
     @Resource(name = "customWordsByDateRange")
     private SyncPullArticleHandler.CustomWordsByDateRange customWordsByDateRange;
 
@@ -32,37 +32,20 @@ public class SyncPullArticleOfCustomJob {
         TimeType timeType = quartzProperties.getTimeType();
         Integer timeRange = quartzProperties.getTimeRange();
         long count;
+        DateUtils.DateRange dateRange = DateUtils.intervalTimeCoverTimeType(timeType, timeRange);
         if (Objects.equal(timeType, TimeType.YEAR) ||
                 Objects.equal(timeType, TimeType.MONTH) ||
                 Objects.equal(timeType, TimeType.DAY)) {
-            LocalDate localDate = DateUtils.currentDate();
             JSONObject extraParams = new JSONObject();
-            LocalDate startDate = localDate;
-            if (Objects.equal(timeType, TimeType.YEAR)) {
-                startDate = localDate.plusYears(timeRange);
-            } else if (Objects.equal(timeType, TimeType.MONTH)) {
-                startDate = localDate.plusMonths(timeRange);
-            } else if (Objects.equal(timeType, TimeType.DAY)) {
-                startDate = localDate.plusDays(timeRange);
-            }
             extraParams.put("storageMode", StorageMode.INTERFACE);
-            extraParams.put("startDate", startDate);
-            extraParams.put("endDate", localDate);
+            extraParams.put("startDate", dateRange.getStartDate());
+            extraParams.put("endDate", dateRange.getEndDate());
             count = customWordsByDateRange.handlerData(extraParams);
         } else {
-            LocalDateTime localDateTime = DateUtils.currentDateTime();
             JSONObject extraParams = new JSONObject();
-            LocalDateTime startDateTime = localDateTime;
-            if (Objects.equal(timeType, TimeType.HOUR)) {
-                startDateTime = localDateTime.plusHours(timeRange);
-            } else if (Objects.equal(timeType, TimeType.MINUTE)) {
-                startDateTime = localDateTime.plusMinutes(timeRange);
-            } else if (Objects.equal(timeType, TimeType.SECOND)) {
-                startDateTime = localDateTime.plusSeconds(timeRange);
-            }
             extraParams.put("storageMode", StorageMode.INTERFACE);
-            extraParams.put("startDateTime", startDateTime);
-            extraParams.put("endDateTime", localDateTime);
+            extraParams.put("startDateTime", dateRange.getStartDateTime());
+            extraParams.put("endDateTime", dateRange.getEndDateTime());
             extraParams.put("fromType", DateUtils.formatDate(LocalDate.now()));
             count = customWordsByTimeRange.handlerData(extraParams);
         }

@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Component
@@ -15,6 +17,6 @@ public class QuartzProperties {
     private String corn;
     private TimeType timeType;
     private Integer timeRange;
-    private JobType jobType;
+    private List<JobType> jobType;
     private Boolean state;
 }

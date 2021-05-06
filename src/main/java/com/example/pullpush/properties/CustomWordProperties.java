@@ -13,4 +13,5 @@ import java.util.List;
 @ConfigurationProperties(prefix = "custom.custom-word")
 public class CustomWordProperties {
     private List<String> word;
+    private List<String> author;
 }

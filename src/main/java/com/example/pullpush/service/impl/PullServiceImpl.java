@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.pullpush.analysis.service.AnalysisService;
 import com.example.pullpush.custom.CustomPage;
+import com.example.pullpush.custom.RichParameters;
 import com.example.pullpush.dto.FileInfoDto;
 import com.example.pullpush.enums.StorageMode;
 import com.example.pullpush.es.domain.EsArticle;
@@ -40,16 +41,24 @@ public class PullServiceImpl implements PullService {
 
     private final AnalysisService analysisService;
 
+    /**
+     * 一天一天查询
+     * @param richParameters 丰富参数
+     * @param words 词
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @return 数量
+     */
     @Override
-    public long pullEsArticleByDateRange(StorageMode storageMode, List<String> gatherWords,
-                                         LocalDate startDate, LocalDate endDate,
-                                         String fromType) {
+    public long pullEsArticleByDateRange(RichParameters richParameters, List<String> words,
+                                         LocalDate startDate, LocalDate endDate) {
+        String fromType = richParameters.getFromType();
         ExecutorService executorService = Executors.newCachedThreadPool();
-        JSONArray related = JSONArray.parseArray(JSONArray.toJSONString(gatherWords));
+        JSONArray wordJa = JSONArray.parseArray(JSONArray.toJSONString(words));
         List<LocalDate> localDates = DateUtils.dateRangeList(startDate, endDate);
         List<Future<Long>> collect = localDates.stream().map(localDate -> {
             String mapKey = "day_" + fromType + "_" + DateUtils.formatDate(localDate);
-            return executorService.submit(new PullArticleHandle(storageMode, esArticleService, analysisService, related,
+            return executorService.submit(new PullArticleHandle(richParameters, esArticleService, analysisService, wordJa,
                     localDate.atTime(LocalTime.of(0, 0, 0)),
                     localDate.atTime(LocalTime.of(23, 59, 59)),
                     esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
@@ -58,12 +67,21 @@ public class PullServiceImpl implements PullService {
         return collect.stream().map(TheadUtils::getFutureLong).mapToLong(Long::longValue).sum();
     }
 
+    /**
+     * 时间范围查询
+     * @param richParameters 丰富参数
+     * @param words 词
+     * @param startDateTime 开始时间
+     * @param endDateTime 结束时间
+     * @return 数量
+     */
     @Override
-    public long pullEsArticleByTimeRange(StorageMode storageMode, List<String> gatherWords, LocalDateTime startDateTime, LocalDateTime endDateTime, String fromType) {
+    public long pullEsArticleByTimeRange(RichParameters richParameters, List<String> words, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        String fromType = richParameters.getFromType();
         ExecutorService executorService = Executors.newCachedThreadPool();
-        JSONArray related = JSONArray.parseArray(JSONArray.toJSONString(gatherWords));
+        JSONArray wordJa = JSONArray.parseArray(JSONArray.toJSONString(words));
         String mapKey = "timeRange_" + fromType;
-        Future<Long> submit = executorService.submit(new PullArticleHandle(storageMode, esArticleService, analysisService, related, startDateTime, endDateTime, esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
+        Future<Long> submit = executorService.submit(new PullArticleHandle(richParameters, esArticleService, analysisService, wordJa, startDateTime, endDateTime, esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
         executorService.shutdown();
         return TheadUtils.getFutureLong(submit);
     }
@@ -73,13 +91,13 @@ public class PullServiceImpl implements PullService {
     @Slf4j
     public static class PullArticleHandle implements Callable<Long> {
 
-        private final StorageMode storageMode;
+        private final RichParameters richParameters;
 
         private final EsArticleService esArticleService;
 
         private final AnalysisService analysisService;
 
-        private final JSONArray related;
+        private final JSONArray wordJa;
 
         private final LocalDateTime startDateTime;
 
@@ -93,7 +111,7 @@ public class PullServiceImpl implements PullService {
 
         @Override
         public Long call() {
-
+            StorageMode storageMode = richParameters.getStorageMode();
             ExecutorService executorService = Executors.newCachedThreadPool();
 
             ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<>(1000);
@@ -108,8 +126,8 @@ public class PullServiceImpl implements PullService {
                 long totalRequestTime = 0;
 
                 String scrollId = concurrentHashMap.getOrDefault(mapKey, StringUtils.EMPTY);
-                CustomPage<EsArticle> allDataEsArticlePage = esArticleService.findAllDataEsArticlePage(related, scrollId,
-                        startDateTime, endDateTime, pageSize);
+                CustomPage<EsArticle> allDataEsArticlePage = esArticleService.findAllDataEsArticlePage(richParameters.getSearchModel(), wordJa,
+                        scrollId, startDateTime, endDateTime, pageSize);
                 if (allDataEsArticlePage.getScrollId() != null) {
                     concurrentHashMap.put(mapKey, allDataEsArticlePage.getScrollId());
                 }

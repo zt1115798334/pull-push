@@ -1,6 +1,6 @@
 package com.example.pullpush.service;
 
-import com.example.pullpush.dto.GatherWordDto;
+import com.example.pullpush.custom.RichParameters;
 import com.example.pullpush.enums.StorageMode;
 
 import java.time.LocalDate;
@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface PullService {
 
-    long pullEsArticleByDateRange(StorageMode storageMode, List<String> gatherWords, LocalDate startDate, LocalDate endDate, String fromType);
+    long pullEsArticleByDateRange(RichParameters richParameters, List<String> words, LocalDate startDate, LocalDate endDate);
 
-    long pullEsArticleByTimeRange(StorageMode storageMode, List<String> gatherWords, LocalDateTime startDateTime, LocalDateTime endDateTime, String fromType);
+    long pullEsArticleByTimeRange(RichParameters richParameters, List<String> words, LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

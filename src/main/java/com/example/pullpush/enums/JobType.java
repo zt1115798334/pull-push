@@ -1,7 +1,9 @@
 package com.example.pullpush.enums;
 
+
 public enum JobType {
-    CUSTOM,
-    GATHER,
-    PUSH,
+    CUSTOM_AUTHOR,
+    CUSTOM_WORD,
+    GATHER_WORD,
+    PUSH_ARTICLE,
 }

@@ -2,7 +2,9 @@ package com.example.pullpush.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.pullpush.base.handler.page.PageHandler;
+import com.example.pullpush.custom.RichParameters;
 import com.example.pullpush.dto.GatherWordDto;
+import com.example.pullpush.enums.SearchModel;
 import com.example.pullpush.enums.StorageMode;
 import com.example.pullpush.mysql.service.GatherWordsService;
 import com.example.pullpush.properties.CustomWordProperties;
@@ -27,6 +29,25 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class SyncPullArticleHandler {
 
+    @Component("customAuthorsByDateRange")
+    @AllArgsConstructor
+    public static class CustomAuthorsByDateRange {
+
+        private final PullService pullEsArticle;
+        private final CustomWordProperties customWordProperties;
+
+        public long handlerData(JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
+            LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
+            List<String> authors = customWordProperties.getAuthor().stream()
+                    .distinct().collect(Collectors.toList());
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.AUTHOR).fromType("custom").build();
+            return pullEsArticle.pullEsArticleByDateRange(richParameters, authors, startDate, endDate);
+        }
+    }
+
     @Component("customWordsByDateRange")
     @AllArgsConstructor
     public static class CustomWordsByDateRange {
@@ -42,10 +63,10 @@ public class SyncPullArticleHandler {
             List<String> gatherWords = customWordProperties.getWord().stream().map(MStringUtils::splitMinGranularityStr)
                     .flatMap(Collection::stream)
                     .distinct().collect(Collectors.toList());
-            return pullEsArticle.pullEsArticleByDateRange(storageMode, gatherWords, startDate, endDate, "custom");
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType("custom").build();
+            return pullEsArticle.pullEsArticleByDateRange(richParameters, gatherWords, startDate, endDate);
         }
     }
-
 
     @Component("gatherWordsByDateRange")
     @AllArgsConstructor
@@ -62,7 +83,8 @@ public class SyncPullArticleHandler {
             LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
             LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
             List<String> gatherWords = list.stream().map(GatherWordDto::getName).collect(Collectors.toList());
-            return pullEsArticle.pullEsArticleByDateRange(storageMode, gatherWords, startDate, endDate, "gather");
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType("gather").build();
+            return pullEsArticle.pullEsArticleByDateRange(richParameters, gatherWords, startDate, endDate);
         }
 
         @Override
@@ -72,6 +94,27 @@ public class SyncPullArticleHandler {
             } else {
                 return gatherWordsService.findPageByEntity(pageNumber, DEFAULT_BATCH_SIZE);
             }
+        }
+    }
+
+    @Component("customAuthorsByTimeRange")
+    @AllArgsConstructor
+    public static class CustomAuthorsByTimeRange {
+
+        private final PullService pullEsArticle;
+
+        private final CustomWordProperties customWordProperties;
+
+        public long handlerData(JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDateTime startDateTime = extraParams.getObject("startDateTime", LocalDateTime.class);
+            LocalDateTime endDateTime = extraParams.getObject("endDateTime", LocalDateTime.class);
+            String fromType = extraParams.getString("fromType");
+            List<String> authors = customWordProperties.getAuthor().stream()
+                    .distinct().collect(Collectors.toList());
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.AUTHOR).fromType(fromType).build();
+            return pullEsArticle.pullEsArticleByTimeRange(richParameters, authors, startDateTime, endDateTime);
         }
     }
 
@@ -92,7 +135,8 @@ public class SyncPullArticleHandler {
             List<String> gatherWords = customWordProperties.getWord().stream().map(MStringUtils::splitMinGranularityStr)
                     .flatMap(Collection::stream)
                     .distinct().collect(Collectors.toList());
-            return pullEsArticle.pullEsArticleByTimeRange(storageMode, gatherWords, startDateTime, endDateTime, fromType);
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType(fromType).build();
+            return pullEsArticle.pullEsArticleByTimeRange(richParameters, gatherWords, startDateTime, endDateTime);
         }
     }
 
@@ -113,7 +157,8 @@ public class SyncPullArticleHandler {
             LocalDateTime endDateTime = extraParams.getObject("endDateTime", LocalDateTime.class);
             String fromType = extraParams.getString("fromType");
             List<String> gatherWords = list.stream().map(GatherWordDto::getName).collect(Collectors.toList());
-            return pullEsArticle.pullEsArticleByTimeRange(storageMode, gatherWords, startDateTime, endDateTime, fromType);
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType(fromType).build();
+            return pullEsArticle.pullEsArticleByTimeRange(richParameters, gatherWords, startDateTime, endDateTime);
         }
 
         @Override

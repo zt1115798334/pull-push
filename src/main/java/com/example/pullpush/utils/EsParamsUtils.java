@@ -2,9 +2,11 @@ package com.example.pullpush.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,8 +28,9 @@ public class EsParamsUtils {
     public static final String ES_THESAURUS_THEME_IDS = "yuqing"; //主题id
     public static final String ES_URL_MAIL = "urlMain";
     public static final String CARRIE = "carrie";
+    private static final String ES_AUTHOR = "author"; //作者
     public static final String ES_COLUMN = "channel";
-    public static final String ES_SITENAME = "siteName";
+    public static final String ES_SITE_NAME = "siteName";
     
     private static final String ES_SEARCH_WORDS = "searchValue"; //相关词
 
@@ -41,40 +44,13 @@ public class EsParamsUtils {
         csJo.put(ES_SEARCH_WORDS, JSONObject.parseArray(related.toJSONString(), String.class));
         return csJo;
     }
-    
-    /**
-     * 处理统一参数
-     *
-     * @param column 栏目名称
-     * @return JSONObject
-     */
-    public static JSONObject getColumnParams(JSONArray column) {
-        JSONObject csJo = new JSONObject();
-        csJo.put(ES_COLUMN, JSONObject.parseArray(column.toJSONString(), String.class));
-        return csJo;
+    public static JSONObject getQueryAuthor(JSONArray authorList) {
+        JSONObject param = new JSONObject();
+        param.put(ES_AUTHOR, JSONObject.parseArray(authorList.toJSONString(), String.class));
+        return param;
     }
 
-    /**
-     * 主题参数
-     *
-     * @param thesaurusThemeIds 主题参数集合
-     * @return JSONObject
-     */
-    public static JSONObject getQueryThesaurusThemeParams(String thesaurusThemeIds) {
-        return EsParamsUtils.getQueryThesaurusThemeParams(MStringUtils.decorateRecoveryStr(thesaurusThemeIds));
-    }
 
-    /**
-     * 主题参数
-     *
-     * @param thesaurusThemeIds 主题参数集合
-     * @return JSONObject
-     */
-    public static JSONObject getQueryThesaurusThemeParams(List<Long> thesaurusThemeIds) {
-        JSONObject csJo = new JSONObject();
-        csJo.put(ES_THESAURUS_THEME_IDS, thesaurusThemeIds);
-        return csJo;
-    }
     
     /**
      * 载体参数
@@ -96,7 +72,7 @@ public class EsParamsUtils {
      */
     public static JSONObject getQuerySiteNameParams(List<String> siteName) {
         JSONObject csJo = new JSONObject();
-        csJo.put(ES_SITENAME, siteName);
+        csJo.put(ES_SITE_NAME, siteName);
         return csJo;
     }
 
