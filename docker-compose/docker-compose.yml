@@ -9,4 +9,4 @@ services:
       - /data/log:/log:rw
       - /etc/localtime:/etc/localtime:ro
     env_file:
-      - pull-push.env
+      - ./env/pull-push.env

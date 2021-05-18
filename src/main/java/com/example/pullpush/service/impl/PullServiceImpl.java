@@ -53,7 +53,7 @@ public class PullServiceImpl implements PullService {
     public long pullEsArticleByDateRange(RichParameters richParameters, List<String> words,
                                          LocalDate startDate, LocalDate endDate) {
         String fromType = richParameters.getFromType();
-        ExecutorService executorService = Executors.newCachedThreadPool();
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
         JSONArray wordJa = JSONArray.parseArray(JSONArray.toJSONString(words));
         List<LocalDate> localDates = DateUtils.dateRangeList(startDate, endDate);
         List<Future<Long>> collect = localDates.stream().map(localDate -> {
@@ -78,7 +78,7 @@ public class PullServiceImpl implements PullService {
     @Override
     public long pullEsArticleByTimeRange(RichParameters richParameters, List<String> words, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         String fromType = richParameters.getFromType();
-        ExecutorService executorService = Executors.newCachedThreadPool();
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
         JSONArray wordJa = JSONArray.parseArray(JSONArray.toJSONString(words));
         String mapKey = "timeRange_" + fromType;
         Future<Long> submit = executorService.submit(new PullArticleHandle(richParameters, esArticleService, analysisService, wordJa, startDateTime, endDateTime, esProperties.getPageSize(), mapKey, esProperties.getFilePath()));
@@ -112,7 +112,7 @@ public class PullServiceImpl implements PullService {
         @Override
         public Long call() {
             StorageMode storageMode = richParameters.getStorageMode();
-            ExecutorService executorService = Executors.newCachedThreadPool();
+            ExecutorService executorService = Executors.newFixedThreadPool(3);
 
             ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<>(1000);
             AtomicInteger atomicInteger = new AtomicInteger();

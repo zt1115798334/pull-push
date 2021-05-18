@@ -2,10 +2,7 @@ package com.example.pullpush.quartz.config;
 
 import com.example.pullpush.enums.JobType;
 import com.example.pullpush.properties.QuartzProperties;
-import com.example.pullpush.quartz.job.SyncPullArticleOfCustomAuthorJob;
-import com.example.pullpush.quartz.job.SyncPullArticleOfCustomWordJob;
-import com.example.pullpush.quartz.job.SyncPullArticleOfGatherWordJob;
-import com.example.pullpush.quartz.job.SyncPushArticleJob;
+import com.example.pullpush.quartz.job.*;
 import com.google.common.collect.Lists;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
@@ -23,6 +20,7 @@ public class QuartzConfig {
 
     @Resource(name = "quartzProperties")
     private QuartzProperties quartzProperties;
+
 
     @Bean(name = "syncPullArticleOfCustomAuthorJobDetail")
     public MethodInvokingJobDetailFactoryBean syncPullArticleOfCustomAuthorJobDetail(SyncPullArticleOfCustomAuthorJob syncPullArticleOfCustomAuthorJob) {
@@ -73,6 +71,33 @@ public class QuartzConfig {
         return cronTriggerFactoryBean;
     }
 
+
+    @Bean(name = "syncPullArticleOfGatherAuthorJobDetail")
+    public MethodInvokingJobDetailFactoryBean syncPullArticleOfGatherAuthorJobDetail(SyncPullArticleOfGatherAuthorJob syncPullArticleOfGatherAuthorJob) {
+        MethodInvokingJobDetailFactoryBean jobDetail = new MethodInvokingJobDetailFactoryBean();
+        // 是否并发执行
+        jobDetail.setConcurrent(false);
+        // 为需要执行的实体类对应的对象
+        jobDetail.setTargetObject(syncPullArticleOfGatherAuthorJob);
+        // 需要执行的方法
+        jobDetail.setTargetMethod("execute");
+        return jobDetail;
+    }
+
+    @Bean(name = "syncPullArticleOfGatherAuthorTrigger")
+    public CronTriggerFactoryBean syncPullArticleOfGatherAuthorTrigger(JobDetail syncPullArticleOfGatherAuthorJobDetail) {
+        CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
+        // 设置jobDetail
+        cronTriggerFactoryBean.setJobDetail(syncPullArticleOfGatherAuthorJobDetail);
+        //秒 分 小时 日 月 星期 年  每10分钟
+        cronTriggerFactoryBean.setCronExpression(quartzProperties.getCorn());//"0 0/30 * * * ?"
+        //trigger超时处理策略 默认1：总是会执行头一次 2:不处理
+        cronTriggerFactoryBean.setMisfireInstruction(2);
+        return cronTriggerFactoryBean;
+    }
+
+
+
     @Bean(name = "syncPullArticleOfGatherWordJobDetail")
     public MethodInvokingJobDetailFactoryBean syncPullArticleOfGatherWordJobDetail(SyncPullArticleOfGatherWordJob syncPullArticleOfGatherWordJob) {
         MethodInvokingJobDetailFactoryBean jobDetail = new MethodInvokingJobDetailFactoryBean();
@@ -96,6 +121,7 @@ public class QuartzConfig {
         cronTriggerFactoryBean.setMisfireInstruction(2);
         return cronTriggerFactoryBean;
     }
+
 
     @Bean(name = "syncPushArticleJobDetail")
     public MethodInvokingJobDetailFactoryBean syncPushArticleJobDetail(SyncPushArticleJob syncPushArticleJob) {
@@ -125,6 +151,7 @@ public class QuartzConfig {
     public SchedulerFactoryBean schedulerFactory(
             Trigger syncPullArticleOfCustomAuthorTrigger,
             Trigger syncPullArticleOfCustomWordTrigger,
+            Trigger syncPullArticleOfGatherAuthorTrigger,
             Trigger syncPullArticleOfGatherWordTrigger,
             Trigger syncPushArticleTrigger) {
         SchedulerFactoryBean bean = new SchedulerFactoryBean();
@@ -139,6 +166,9 @@ public class QuartzConfig {
             }
             if (jobType.contains(JobType.CUSTOM_WORD)) {
                 triggerList.add(syncPullArticleOfCustomWordTrigger);
+            }
+            if (jobType.contains(JobType.GATHER_AUTHOR)) {
+                triggerList.add(syncPullArticleOfGatherAuthorTrigger);
             }
             if (jobType.contains(JobType.GATHER_WORD)) {
                 triggerList.add(syncPullArticleOfGatherWordTrigger);

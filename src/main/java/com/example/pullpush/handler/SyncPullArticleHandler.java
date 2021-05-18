@@ -6,6 +6,8 @@ import com.example.pullpush.custom.RichParameters;
 import com.example.pullpush.dto.GatherWordDto;
 import com.example.pullpush.enums.SearchModel;
 import com.example.pullpush.enums.StorageMode;
+import com.example.pullpush.mysql.entity.Author;
+import com.example.pullpush.mysql.service.AuthorService;
 import com.example.pullpush.mysql.service.GatherWordsService;
 import com.example.pullpush.properties.CustomWordProperties;
 import com.example.pullpush.service.PullService;
@@ -68,6 +70,32 @@ public class SyncPullArticleHandler {
         }
     }
 
+    @Component("gatherAuthorsByDateRange")
+    @AllArgsConstructor
+    public static class GatherAuthorsByDateRange extends PageHandler<Author> {
+
+        private final PullService pullEsArticle;
+
+        private final AuthorService authorService;
+
+        @Override
+        protected long handleDataOfPerPage(List<Author> list, int pageNumber, JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
+            LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
+            List<String> authors = list.parallelStream().map(Author::getAuthorName)
+                    .distinct().collect(Collectors.toList());
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.AUTHOR).fromType("custom").build();
+            return pullEsArticle.pullEsArticleByDateRange(richParameters, authors, startDate, endDate);
+        }
+
+        @Override
+        protected Page<Author> getPageList(int pageNumber, JSONObject extraParams) {
+            return authorService.findPageByEntity(pageNumber, DEFAULT_BATCH_SIZE);
+        }
+    }
+
     @Component("gatherWordsByDateRange")
     @AllArgsConstructor
     public static class GatherWordsByDateRange extends PageHandler<GatherWordDto> {
@@ -96,6 +124,7 @@ public class SyncPullArticleHandler {
             }
         }
     }
+
 
     @Component("customAuthorsByTimeRange")
     @AllArgsConstructor
@@ -137,6 +166,33 @@ public class SyncPullArticleHandler {
                     .distinct().collect(Collectors.toList());
             RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType(fromType).build();
             return pullEsArticle.pullEsArticleByTimeRange(richParameters, gatherWords, startDateTime, endDateTime);
+        }
+    }
+
+    @Component("gatherAuthorsByTimeRange")
+    @AllArgsConstructor
+    public static class GatherAuthorsByTimeRange extends PageHandler<Author> {
+
+        private final PullService pullEsArticle;
+
+        private final AuthorService authorService;
+
+        @Override
+        protected long handleDataOfPerPage(List<Author> list, int pageNumber, JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDateTime startDateTime = extraParams.getObject("startDateTime", LocalDateTime.class);
+            LocalDateTime endDateTime = extraParams.getObject("endDateTime", LocalDateTime.class);
+            String fromType = extraParams.getString("fromType");
+            List<String> authors = list.parallelStream().map(Author::getAuthorName)
+                    .distinct().collect(Collectors.toList());
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.AUTHOR).fromType(fromType).build();
+            return pullEsArticle.pullEsArticleByTimeRange(richParameters, authors, startDateTime, endDateTime);
+        }
+
+        @Override
+        protected Page<Author> getPageList(int pageNumber, JSONObject extraParams) {
+            return authorService.findPageByEntity(pageNumber, DEFAULT_BATCH_SIZE);
         }
     }
 
