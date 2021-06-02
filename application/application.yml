@@ -1,3 +1,5 @@
+server:
+  port: ${SERVER_PORT=8898}
 spring:
   application:
     name: pull-push
@@ -40,16 +42,15 @@ custom:
     file-path: ${CUSTOM_ES_FILE_PATH}
     read-model: ${CUSTOM_ES_READ_MODEL}
     analysis: ${CUSTOM_ES_ANALYSIS}
+    search-type: ${CUSTOM_ES_SEARCH_TYPE}
     es5:
       key: ${CUSTOM_ES_ES5_KEY}
       host: ${CUSTOM_ES_ES5_HOST}
       app-id: 1231231
-      full-query: /restserver/river/dataQuery
+      full-query: ${CUSTOM_ES_ES5_FULL_QUERY}
   quartz:
     corn: ${CUSTOM_QUARTZ_CORN}
     time-type: ${CUSTOM_QUARTZ_TIME_TYPE}
     time-range: ${CUSTOM_QUARTZ_TIME_RANGE}
     job-Type: ${CUSTOM_QUARTZ_JOB_TYPE}
     state: ${CUSTOM_QUARTZ_STATE}
-server:
-  port: 8898

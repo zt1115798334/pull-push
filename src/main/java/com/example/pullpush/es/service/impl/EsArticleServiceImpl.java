@@ -5,9 +5,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.example.pullpush.custom.CustomPage;
 import com.example.pullpush.enums.SearchModel;
+import com.example.pullpush.enums.SearchType;
 import com.example.pullpush.es.domain.EsArticle;
 import com.example.pullpush.es.service.EsArticleService;
 import com.example.pullpush.es.service.EsInterfaceService;
+import com.example.pullpush.properties.EsProperties;
 import com.example.pullpush.utils.ArticleUtils;
 import com.example.pullpush.utils.EsParamsUtils;
 import com.google.common.base.Objects;
@@ -35,6 +37,8 @@ import java.util.stream.Collectors;
 public class EsArticleServiceImpl implements EsArticleService {
 
     private final EsInterfaceService esInterfaceService;
+
+    private final EsProperties esProperties;
 
     private List<EsArticle> jsonToArticleList(JSONArray jsonArray) {
         return Optional.ofNullable(jsonArray)
@@ -83,7 +87,11 @@ public class EsArticleServiceImpl implements EsArticleService {
         System.out.println("searchModel = " + searchModel);
         JSONObject params = new JSONObject();
         if (Objects.equal(searchModel, SearchModel.RELATED_WORDS)) {
-            params.putAll(EsParamsUtils.getQueryParams(wordJa));
+            if (Objects.equal(esProperties.getSearchType(), SearchType.EXACT)) {
+                params.putAll(EsParamsUtils.getQueryRelatedWordsParams(wordJa));
+            }else{
+                params.putAll(EsParamsUtils.getQuerySearchValueParams(wordJa));
+            }
         } else if (Objects.equal(searchModel, SearchModel.AUTHOR)) {
             params.putAll(EsParamsUtils.getQueryAuthor(wordJa));
         }

@@ -7,4 +7,4 @@ curl -X GET "http://localhost:8087/api/pullArticleOfCustomWords?startDate=2021-0
 用户设置词获取文章到本地
 curl -X GET "http://localhost:8080/api/pullArticleOfGatherWords?startDate=2021-04-06&endDate=2021-04-07&storageMode=LOCAL&status=true"
 用户设置词获取文章到分析接口
-curl -X GET "http://127.0.0.1:8898/api/pullArticleOfGatherWords?startDate=2021-05-01&endDate=2021-05-18&storageMode=INTERFACE&status=true"
+curl -X GET "http://127.0.0.1:8898/api/pullArticleOfGatherWords?startDate=2021-05-25&endDate=2021-06-01&storageMode=INTERFACE&status=true"

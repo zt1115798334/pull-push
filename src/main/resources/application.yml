@@ -1,4 +1,5 @@
-
+server:
+  port: 8898
 spring:
   application:
     name: pull-push
@@ -56,11 +57,12 @@ custom:
     file-path: D:\\test
     read-model: DB
     analysis: http://127.0.0.1:8079
+    search-type: EXACT
     es5: #es配置信息
       key: zkdj_yuQing
-      host: http://116.62.153.127:8199/river
+      host: http://river.junquan.com.cn
       app-id: 1231231
-      full-query: /restserver/river/dataQuery
+      full-query: /river/river/dataQuery
   quartz:
 #    每隔5秒执行一次：*/5 * * * * ?
 #    每隔1分钟执行一次：0 */1 * * * ?
@@ -83,5 +85,3 @@ custom:
       - GATHER_AUTHOR
     #    true 开启  false 关闭
     state: false
-server:
-  port: 8898

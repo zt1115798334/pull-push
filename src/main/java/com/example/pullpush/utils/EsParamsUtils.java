@@ -39,9 +39,14 @@ public class EsParamsUtils {
      *
      * @return JSONObject
      */
-    public static JSONObject getQueryParams(JSONArray related) {
+    public static JSONObject getQuerySearchValueParams(JSONArray related) {
         JSONObject csJo = new JSONObject();
         csJo.put(ES_SEARCH_WORDS, JSONObject.parseArray(related.toJSONString(), String.class));
+        return csJo;
+    }
+    public static JSONObject getQueryRelatedWordsParams(JSONArray related) {
+        JSONObject csJo = new JSONObject();
+        csJo.put(ES_RELATED_WORDS, JSONObject.parseArray(related.toJSONString(), String.class));
         return csJo;
     }
     public static JSONObject getQueryAuthor(JSONArray authorList) {
@@ -55,7 +60,7 @@ public class EsParamsUtils {
     /**
      * 载体参数
      *
-     * @param 
+     * @param carrie
      * @return JSONObject
      */
     public static JSONObject getQueryCarrieParams(List<Integer> carrie) {
@@ -67,7 +72,7 @@ public class EsParamsUtils {
     /**
      * 站点参数
      *
-     * @param 
+     * @param siteName
      * @return JSONObject
      */
     public static JSONObject getQuerySiteNameParams(List<String> siteName) {

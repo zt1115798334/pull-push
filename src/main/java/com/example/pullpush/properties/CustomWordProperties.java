@@ -1,5 +1,6 @@
 package com.example.pullpush.properties;
 
+import com.example.pullpush.enums.SearchType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
