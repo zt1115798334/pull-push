@@ -162,7 +162,7 @@ public class HttpClientUtils {
     private String httpRequest(String url, Map<String, String> headerMap, Map<String, Object> paramMap, Charset charset, int reTry, HttpMethod httpMethod, String mediaType) {
         long startTime = System.currentTimeMillis();
         String paramJson = JSONObject.parseObject(JSON.toJSONString(paramMap, SerializerFeature.DisableCircularReferenceDetect)).toJSONString();
-        log.info("请求URl：{},请求Method：{},请求头：{}，请求内容：{}", url, httpMethod.toString(), headerMap, paramJson.length() > 5000 ? "" : paramJson);
+        log.info("请求URl：{},请求Method：{},请求头：{}，请求内容：{}", url, httpMethod.toString(), headerMap, paramJson.length() > 100 ? "" : paramJson);
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         String result = null;

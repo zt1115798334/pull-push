@@ -56,10 +56,10 @@ custom:
     page-size: 500
     file-path: D:\\test
     read-model: DB
-    analysis: http://127.0.0.1:8079
+    analysis: http://127.0.0.1:8081
     search-type: EXACT
     es5: #es配置信息
-      key: zkdj_yuQing
+      key: yq_yuzhong
       host: http://river.junquan.com.cn
       app-id: 1231231
       full-query: /river/river/dataQuery

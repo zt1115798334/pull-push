@@ -4,6 +4,7 @@ import com.example.pullpush.enums.ReadModel;
 import com.example.pullpush.enums.SearchType;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
  * date: 2018/8/22 10:53
  * description: es配置
  */
+@ToString
 @Getter
 @Setter
 @Component
@@ -35,6 +37,7 @@ public class EsProperties {
     private EsInfo es5;
 
 
+    @ToString
     @Getter
     @Setter
     public static class EsInfo {
