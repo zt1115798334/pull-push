@@ -5,6 +5,7 @@ import com.example.pullpush.base.controller.BaseResultMessage;
 import com.example.pullpush.base.controller.ResultMessage;
 import com.example.pullpush.enums.StorageMode;
 import com.example.pullpush.handler.SyncPullArticleHandler;
+import com.example.pullpush.quartz.job.SyncPullArticleOfCustomAuthorJob;
 import com.example.pullpush.utils.DateUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,6 +36,12 @@ public class PullController extends BaseResultMessage {
     @Resource(name = "gatherWordsByDateRange")
     private final SyncPullArticleHandler.GatherWordsByDateRange gatherWordsByDateRange;
 
+    @Resource(name = "customAuthorsByDateRange")
+    private final SyncPullArticleHandler.CustomAuthorsByDateRange customAuthorsByDateRange;
+
+    @Resource(name = "gatherAuthorsByDateRange")
+    private final SyncPullArticleHandler.GatherAuthorsByDateRange gatherAuthorsByDateRange;
+
     @GetMapping("pullArticleOfCustomWords")
     public ResultMessage pullArticleOfCustomWords(@DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
                                                   @RequestParam LocalDate startDate,
@@ -62,6 +69,34 @@ public class PullController extends BaseResultMessage {
         extraParams.put("endDate", endDate);
         extraParams.put("status", status);
         gatherWordsByDateRange.handle(extraParams);
+        return success();
+    }
+
+    @GetMapping("pullArticleOfCustomAuthors")
+    public ResultMessage pullArticleOfCustomAuthors(@DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
+                                                  @RequestParam LocalDate startDate,
+                                                  @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
+                                                  @RequestParam LocalDate endDate,
+                                                  @RequestParam StorageMode storageMode) {
+        JSONObject extraParams = new JSONObject();
+        extraParams.put("storageMode", storageMode);
+        extraParams.put("startDate", startDate);
+        extraParams.put("endDate", endDate);
+        long handlerData = customAuthorsByDateRange.handlerData(extraParams);
+        return success(handlerData);
+    }
+
+    @GetMapping("pullArticleOfGatherAuthors")
+    public ResultMessage pullArticleOfGatherAuthors(@DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
+                                                  @RequestParam LocalDate startDate,
+                                                  @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
+                                                  @RequestParam LocalDate endDate,
+                                                  @RequestParam StorageMode storageMode) {
+        JSONObject extraParams = new JSONObject();
+        extraParams.put("storageMode", storageMode);
+        extraParams.put("startDate", startDate);
+        extraParams.put("endDate", endDate);
+        gatherAuthorsByDateRange.handle(extraParams);
         return success();
     }
 
