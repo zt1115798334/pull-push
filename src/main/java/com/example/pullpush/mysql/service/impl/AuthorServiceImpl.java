@@ -20,4 +20,9 @@ public class AuthorServiceImpl implements AuthorService {
         PageRequest pageRequest = PageUtils.buildPageRequest(pageNumber, pageSize);
         return authorRepository.findAll(pageRequest);
     }
+
+    @Override
+    public boolean isExistsAuthor(String author) {
+        return authorRepository.existsByAuthorName(author);
+    }
 }

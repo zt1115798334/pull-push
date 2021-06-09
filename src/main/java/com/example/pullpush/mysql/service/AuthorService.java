@@ -5,4 +5,5 @@ import com.example.pullpush.dto.GatherWordDto;
 import com.example.pullpush.mysql.entity.Author;
 
 public interface AuthorService  extends BaseService<Author, Long> {
+    boolean isExistsAuthor(String author);
 }
