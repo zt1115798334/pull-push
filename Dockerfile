@@ -1,4 +1,4 @@
-FROM java:8
+FROM openjdk:8u282-oraclelinux8
 MAINTAINER zt
 VOLUME /tmp
 COPY ./application/application.yml /application/
