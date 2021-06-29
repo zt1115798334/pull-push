@@ -205,7 +205,7 @@ public class HttpClientUtils {
                     log.error("操作失败，Request URL：{}, params：{}, httpStatus: {}", url, paramJson, statusCode);
                 }
             } else {
-                log.error("操作失败，Request URL：{}, params：{}", url, paramJson);
+                log.error("操作失败，Request URL：{}, params：{}", url, "暂无");
             }
 
         } catch (Exception e) {
@@ -248,14 +248,14 @@ public class HttpClientUtils {
                     // 302
                     log.error("访问地址已经改变请更新访问地址");
                 } else {
-                    log.error("操作失败，Request URL：{}, params：{}, httpStatus: {}", url, paramJson, statusCode);
+                    log.error("操作失败，Request URL：{}, params：{}, httpStatus: {}", url, "暂无", statusCode);
                 }
             } else {
-                log.error("操作失败，Request URL：{}, params：{}", url, paramJson);
+                log.error("操作失败，Request URL：{}, params：{}", url, "暂无");
             }
 
         } catch (Exception e) {
-            log.error("请求异常，Request URL：{}, params：{}, Exception:{}", url, paramJson, e);
+            log.error("请求异常，Request URL：{}, params：{}, Exception:{}", url, "暂无", e);
         } finally {
             close(response);
             close(httpClient);
@@ -301,7 +301,7 @@ public class HttpClientUtils {
             }
 
         } catch (Exception e) {
-            log.error("请求异常，Request URL：{}, params：{}, Exception:{}", url, paramJson, e);
+            log.error("请求异常，Request URL：{}, params：{}, Exception:{}", url, "暂无", e);
         } finally {
             close(response);
             close(httpClient);
@@ -448,9 +448,9 @@ public class HttpClientUtils {
             .custom()
             .setCookieSpec(CookieSpecs.STANDARD)
             // 设置连接超时时间
-            .setConnectTimeout(15000)
+            .setConnectTimeout(60000)
             // 设置请求超时时间
-            .setConnectionRequestTimeout(30000)
+            .setConnectionRequestTimeout(60000)
             // 设置读数据超时时间(单位毫秒)
             .setSocketTimeout(60000)
             // 默认允许自动重定向
