@@ -5,7 +5,6 @@ import com.example.pullpush.base.controller.BaseResultMessage;
 import com.example.pullpush.base.controller.ResultMessage;
 import com.example.pullpush.enums.StorageMode;
 import com.example.pullpush.handler.SyncPullArticleHandler;
-import com.example.pullpush.quartz.job.SyncPullArticleOfCustomAuthorJob;
 import com.example.pullpush.utils.DateUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -74,10 +73,10 @@ public class PullController extends BaseResultMessage {
 
     @GetMapping("pullArticleOfCustomAuthors")
     public ResultMessage pullArticleOfCustomAuthors(@DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
-                                                  @RequestParam LocalDate startDate,
-                                                  @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
-                                                  @RequestParam LocalDate endDate,
-                                                  @RequestParam StorageMode storageMode) {
+                                                    @RequestParam LocalDate startDate,
+                                                    @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
+                                                    @RequestParam LocalDate endDate,
+                                                    @RequestParam StorageMode storageMode) {
         JSONObject extraParams = new JSONObject();
         extraParams.put("storageMode", storageMode);
         extraParams.put("startDate", startDate);
@@ -88,10 +87,10 @@ public class PullController extends BaseResultMessage {
 
     @GetMapping("pullArticleOfGatherAuthors")
     public ResultMessage pullArticleOfGatherAuthors(@DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
-                                                  @RequestParam LocalDate startDate,
-                                                  @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
-                                                  @RequestParam LocalDate endDate,
-                                                  @RequestParam StorageMode storageMode) {
+                                                    @RequestParam LocalDate startDate,
+                                                    @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
+                                                    @RequestParam LocalDate endDate,
+                                                    @RequestParam StorageMode storageMode) {
         JSONObject extraParams = new JSONObject();
         extraParams.put("storageMode", storageMode);
         extraParams.put("startDate", startDate);
