@@ -43,10 +43,11 @@ public class PullServiceImpl implements PullService {
 
     /**
      * 一天一天查询
+     *
      * @param richParameters 丰富参数
-     * @param words 词
-     * @param startDate 开始日期
-     * @param endDate 结束日期
+     * @param words          词
+     * @param startDate      开始日期
+     * @param endDate        结束日期
      * @return 数量
      */
     @Override
@@ -69,10 +70,11 @@ public class PullServiceImpl implements PullService {
 
     /**
      * 时间范围查询
+     *
      * @param richParameters 丰富参数
-     * @param words 词
-     * @param startDateTime 开始时间
-     * @param endDateTime 结束时间
+     * @param words          词
+     * @param startDateTime  开始时间
+     * @param endDateTime    结束时间
      * @return 数量
      */
     @Override
@@ -127,7 +129,7 @@ public class PullServiceImpl implements PullService {
 
                 String scrollId = concurrentHashMap.getOrDefault(mapKey, StringUtils.EMPTY);
                 CustomPage<EsArticle> allDataEsArticlePage = esArticleService.findAllDataEsArticlePage(richParameters.getSearchModel(), wordJa,
-                        scrollId, startDateTime, endDateTime, pageSize);
+                        scrollId, startDateTime, endDateTime, pageSize, richParameters.getCarrier());
                 if (allDataEsArticlePage.getScrollId() != null) {
                     concurrentHashMap.put(mapKey, allDataEsArticlePage.getScrollId());
                 }
@@ -139,8 +141,9 @@ public class PullServiceImpl implements PullService {
                 }
                 RateLimiter rateLimiter = RateLimiter.create(100);
                 List<Future<Long>> futureList = articleList.stream().map(esArticle -> {
-                    String ossPath = esArticle.getOssPath();
-                    String fileName = ossPath.substring(ossPath.indexOf("_") + 1);
+//                    String ossPath = esArticle.getOssPath();
+//                    String fileName = ossPath.substring(ossPath.indexOf("_") + 1);
+                    String fileName = esArticle.getId();
                     FileInfoDto fileInfoDto = FileInfoDto.builder().filename(fileName).content(getArticleJson(esArticle)).build();
                     Callable<Long> callable = Objects.equal(storageMode, StorageMode.LOCAL) ?
                             new WriteInLocal(startDateTime.toLocalDate(), getArticleJson(esArticle), filePath, fileName, atomicInteger)

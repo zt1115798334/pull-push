@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.example.pullpush.custom.CustomPage;
+import com.example.pullpush.enums.Carrier;
 import com.example.pullpush.enums.SearchModel;
 import com.example.pullpush.enums.SearchType;
 import com.example.pullpush.es.domain.EsArticle;
@@ -83,13 +84,13 @@ public class EsArticleServiceImpl implements EsArticleService {
     public CustomPage<EsArticle> findAllDataEsArticlePage(SearchModel searchModel, JSONArray wordJa,
                                                           String scrollId,
                                                           LocalDateTime startDateTime, LocalDateTime endDateTime,
-                                                          int pageSize) {
+                                                          int pageSize, List<Carrier> carrier) {
         System.out.println("searchModel = " + searchModel);
         JSONObject params = new JSONObject();
         if (Objects.equal(searchModel, SearchModel.RELATED_WORDS)) {
             if (Objects.equal(esProperties.getSearchType(), SearchType.EXACT)) {
                 params.putAll(EsParamsUtils.getQueryRelatedWordsParams(wordJa));
-            }else{
+            } else {
                 params.putAll(EsParamsUtils.getQuerySearchValueParams(wordJa));
             }
         } else if (Objects.equal(searchModel, SearchModel.AUTHOR)) {
@@ -98,6 +99,10 @@ public class EsArticleServiceImpl implements EsArticleService {
         params.putAll(EsParamsUtils.getQueryScrollIdParams(scrollId));
         params.putAll(EsParamsUtils.getQueryTimeParams(startDateTime, endDateTime));
         params.put("searchType", "all");
+        if (carrier != null && !carrier.isEmpty()) {
+            List<Integer> carrierCode = carrier.stream().map(Carrier::getCode).collect(Collectors.toList());
+            params.putAll(EsParamsUtils.getQueryCarrieParams(carrierCode));
+        }
         String str = esInterfaceService.dataQuery(params, pageSize);
         return jsonToArticlePage(str);
     }

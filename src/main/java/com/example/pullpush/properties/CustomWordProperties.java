@@ -1,6 +1,6 @@
 package com.example.pullpush.properties;
 
-import com.example.pullpush.enums.SearchType;
+import com.example.pullpush.enums.Carrier;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,4 +15,6 @@ import java.util.List;
 public class CustomWordProperties {
     private List<String> word;
     private List<String> author;
+    private List<Carrier> carrier;
+
 }

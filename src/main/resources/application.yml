@@ -51,18 +51,21 @@ custom:
       - 津门教育
       - 内蒙古教育发布
       - 辽宁省教育厅
+    carrier:
   es:
     version: 5
     page-size: 500
     file-path: D:\\test
     read-model: DB
-    analysis: http://127.0.0.1:8081
+    analysis: http://114.55.145.196:8484
     search-type: EXACT
     es5: #es配置信息
       key: yq_yuzhong
-      host: http://river.junquan.com.cn
+#      host: http://river.junquan.com.cn
+      host: http://124.70.111.118:80
       app-id: 1231231
       full-query: /river/river/dataQuery
+#      full-query: /restserver/river/dataQuery
   quartz:
 #    每隔5秒执行一次：*/5 * * * * ?
 #    每隔1分钟执行一次：0 */1 * * * ?
@@ -78,7 +81,7 @@ custom:
     time-type: MINUTE
     #    开始时间提前多少 需要跟corn对应
     time-range: -1
-#    CUSTOM_AUTHOR(自定义作者) CUSTOM_WORD(自定义词) GATHER_WORD（词库中gather表） PUSH_ARTICLE 推送
+#    CUSTOM_AUTHOR(自定义作者) CUSTOM_WORD(自定义词) GATHER_WORD（词库中gather表）GATHER_AUTHOR（词库中author表） PUSH_ARTICLE 推送
     job-Type:
 #      - CUSTOM_AUTHOR
 #      - CUSTOM_WORD

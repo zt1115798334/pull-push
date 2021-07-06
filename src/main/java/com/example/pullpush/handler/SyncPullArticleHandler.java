@@ -45,7 +45,12 @@ public class SyncPullArticleHandler {
             LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
             List<String> authors = customWordProperties.getAuthor().stream()
                     .distinct().collect(Collectors.toList());
-            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.AUTHOR).fromType("custom").build();
+            RichParameters richParameters = RichParameters.builder()
+                    .storageMode(storageMode)
+                    .searchModel(SearchModel.AUTHOR)
+                    .fromType("custom")
+                    .carrier(customWordProperties.getCarrier())
+                    .build();
             return pullEsArticle.pullEsArticleByDateRange(richParameters, authors, startDate, endDate);
         }
     }
@@ -65,7 +70,12 @@ public class SyncPullArticleHandler {
             List<String> gatherWords = customWordProperties.getWord().stream().map(MStringUtils::splitMinGranularityStr)
                     .flatMap(Collection::stream)
                     .distinct().collect(Collectors.toList());
-            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType("custom").build();
+            RichParameters richParameters = RichParameters.builder()
+                    .storageMode(storageMode)
+                    .searchModel(SearchModel.RELATED_WORDS)
+                    .fromType("custom")
+                    .carrier(customWordProperties.getCarrier())
+                    .build();
             return pullEsArticle.pullEsArticleByDateRange(richParameters, gatherWords, startDate, endDate);
         }
     }
@@ -78,6 +88,8 @@ public class SyncPullArticleHandler {
 
         private final AuthorService authorService;
 
+        private final CustomWordProperties customWordProperties;
+
         @Override
         protected long handleDataOfPerPage(List<Author> list, int pageNumber, JSONObject extraParams) {
             log.info("extraParams:{}", extraParams.toJSONString());
@@ -86,7 +98,12 @@ public class SyncPullArticleHandler {
             LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
             List<String> authors = list.parallelStream().map(Author::getAuthorName)
                     .distinct().collect(Collectors.toList());
-            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.AUTHOR).fromType("custom").build();
+            RichParameters richParameters = RichParameters.builder()
+                    .storageMode(storageMode)
+                    .searchModel(SearchModel.AUTHOR)
+                    .fromType("custom")
+                    .carrier(customWordProperties.getCarrier())
+                    .build();
             return pullEsArticle.pullEsArticleByDateRange(richParameters, authors, startDate, endDate);
         }
 
@@ -104,6 +121,9 @@ public class SyncPullArticleHandler {
 
         private final GatherWordsService gatherWordsService;
 
+        private final CustomWordProperties customWordProperties;
+
+
         @Override
         protected long handleDataOfPerPage(List<GatherWordDto> list, int pageNumber, JSONObject extraParams) {
             log.info("extraParams:{}", extraParams.toJSONString());
@@ -111,7 +131,12 @@ public class SyncPullArticleHandler {
             LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
             LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
             List<String> gatherWords = list.stream().map(GatherWordDto::getName).collect(Collectors.toList());
-            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType("gather").build();
+            RichParameters richParameters = RichParameters.builder()
+                    .storageMode(storageMode)
+                    .searchModel(SearchModel.RELATED_WORDS)
+                    .fromType("gather")
+                    .carrier(customWordProperties.getCarrier())
+                    .build();
             return pullEsArticle.pullEsArticleByDateRange(richParameters, gatherWords, startDate, endDate);
         }
 
@@ -142,7 +167,12 @@ public class SyncPullArticleHandler {
             String fromType = extraParams.getString("fromType");
             List<String> authors = customWordProperties.getAuthor().stream()
                     .distinct().collect(Collectors.toList());
-            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.AUTHOR).fromType(fromType).build();
+            RichParameters richParameters = RichParameters.builder()
+                    .storageMode(storageMode)
+                    .searchModel(SearchModel.AUTHOR)
+                    .fromType(fromType)
+                    .carrier(customWordProperties.getCarrier())
+                    .build();
             return pullEsArticle.pullEsArticleByTimeRange(richParameters, authors, startDateTime, endDateTime);
         }
     }
@@ -164,7 +194,11 @@ public class SyncPullArticleHandler {
             List<String> gatherWords = customWordProperties.getWord().stream().map(MStringUtils::splitMinGranularityStr)
                     .flatMap(Collection::stream)
                     .distinct().collect(Collectors.toList());
-            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType(fromType).build();
+            RichParameters richParameters = RichParameters.builder()
+                    .storageMode(storageMode)
+                    .searchModel(SearchModel.RELATED_WORDS)
+                    .carrier(customWordProperties.getCarrier())
+                    .fromType(fromType).build();
             return pullEsArticle.pullEsArticleByTimeRange(richParameters, gatherWords, startDateTime, endDateTime);
         }
     }
@@ -177,6 +211,8 @@ public class SyncPullArticleHandler {
 
         private final AuthorService authorService;
 
+        private final CustomWordProperties customWordProperties;
+
         @Override
         protected long handleDataOfPerPage(List<Author> list, int pageNumber, JSONObject extraParams) {
             log.info("extraParams:{}", extraParams.toJSONString());
@@ -186,7 +222,11 @@ public class SyncPullArticleHandler {
             String fromType = extraParams.getString("fromType");
             List<String> authors = list.parallelStream().map(Author::getAuthorName)
                     .distinct().collect(Collectors.toList());
-            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.AUTHOR).fromType(fromType).build();
+            RichParameters richParameters = RichParameters.builder().storageMode(storageMode)
+                    .searchModel(SearchModel.AUTHOR)
+                    .fromType(fromType)
+                    .carrier(customWordProperties.getCarrier())
+                    .build();
             return pullEsArticle.pullEsArticleByTimeRange(richParameters, authors, startDateTime, endDateTime);
         }
 
@@ -204,6 +244,8 @@ public class SyncPullArticleHandler {
 
         private final GatherWordsService gatherWordsService;
 
+        private final CustomWordProperties customWordProperties;
+
         @Override
         protected long handleDataOfPerPage(List<GatherWordDto> list, int pageNumber, JSONObject extraParams) {
             log.info("extraParams:{}", extraParams.toJSONString());
@@ -213,7 +255,12 @@ public class SyncPullArticleHandler {
             LocalDateTime endDateTime = extraParams.getObject("endDateTime", LocalDateTime.class);
             String fromType = extraParams.getString("fromType");
             List<String> gatherWords = list.stream().map(GatherWordDto::getName).collect(Collectors.toList());
-            RichParameters richParameters = RichParameters.builder().storageMode(storageMode).searchModel(SearchModel.RELATED_WORDS).fromType(fromType).build();
+            RichParameters richParameters = RichParameters.builder()
+                    .storageMode(storageMode)
+                    .searchModel(SearchModel.RELATED_WORDS)
+                    .fromType(fromType)
+                    .carrier(customWordProperties.getCarrier())
+                    .build();
             return pullEsArticle.pullEsArticleByTimeRange(richParameters, gatherWords, startDateTime, endDateTime);
         }
 

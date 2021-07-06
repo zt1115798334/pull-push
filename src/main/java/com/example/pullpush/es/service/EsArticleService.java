@@ -2,10 +2,12 @@ package com.example.pullpush.es.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.example.pullpush.custom.CustomPage;
+import com.example.pullpush.enums.Carrier;
 import com.example.pullpush.enums.SearchModel;
 import com.example.pullpush.es.domain.EsArticle;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +21,8 @@ public interface EsArticleService {
      *
      * @return EsPage
      */
-    CustomPage<EsArticle> findAllDataEsArticlePage(SearchModel searchModel,JSONArray wordJa, String scrollId, LocalDateTime startDateTime,
-                                                   LocalDateTime endDateTime, int pageSize);
+    CustomPage<EsArticle> findAllDataEsArticlePage(SearchModel searchModel, JSONArray wordJa, String scrollId,
+                                                   LocalDateTime startDateTime,
+                                                   LocalDateTime endDateTime, int pageSize,
+                                                   List<Carrier> carrier);
 }

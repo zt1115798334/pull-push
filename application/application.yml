@@ -36,6 +36,7 @@ custom:
   custom-word:
     word: ${CUSTOM_CUSTOM_WORD_WORD}
     author: ${CUSTOM_CUSTOM_WORD_AUTHOR}
+    carrier: ${CUSTOM_CUSTOM_WORD_CARRIER}
   es:
     version: 5
     page-size: ${CUSTOM_ES_PAGE_SIZE}

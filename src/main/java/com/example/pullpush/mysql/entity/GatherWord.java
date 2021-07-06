@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "t_gather")
+@Table(name = "t_gather_copy1")
 public class GatherWord  extends IdEntity {
 	/**
      * 采集词id

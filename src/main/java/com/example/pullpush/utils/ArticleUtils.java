@@ -74,7 +74,7 @@ public class ArticleUtils {
             esArticle.setContent(jsonObj.getString("content"));//内容
             Integer articleType = ArticleType.TRADITION.getCode();
             //短视频
-            if (Objects.equals(esArticle.getCarrier(), Carrier.CARRIER_SHORT_VIDEO.getType())) {
+            if (Objects.equals(esArticle.getCarrier(), Carrier.SHORT_VIDEO.getType())) {
                 articleType = jsonObj.containsKey("type") && StringUtils.isNotEmpty(jsonObj.getString("type")) ?
                         jsonObj.getIntValue("type") :
                         ArticleType.TRADITION.getCode();

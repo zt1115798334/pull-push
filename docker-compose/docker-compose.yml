@@ -4,9 +4,22 @@ services:
     container_name: pull-push
     image: registry.cn-hangzhou.aliyuncs.com/zt_images/pull-push:latest
     ports:
-      - '8080:8080'
+      - '8898:8080'
     volumes:
-      - /data/log:/log:rw
+      - /pull-push/data/log:/log:rw
       - /etc/localtime:/etc/localtime:ro
     env_file:
-      - ./env/pull-push.env
+      - pull-push/env/pull-push.env
+  mysql-pull:
+    container_name: mysql-pull
+    image: mysql:8.0.23
+    env_file:
+      - mysql-pull/env/mysql.env
+    volumes:
+      - ./mysql-pull/db:/var/lib/mysql
+      - ./mysql-pull/conf:/etc/mysql/conf.d
+      - ./mysql-pull/logs:/logs
+      - ./mysql-pull/init/:/docker-entrypoint-initdb.d/
+      - /etc/localtime:/etc/localtime:rw
+    ports:
+      - '3307:3306'
