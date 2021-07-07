@@ -19,9 +19,9 @@ public class AnTest extends BaseResultMessage {
     @PostMapping("/analysis/analysis/put")
     public ResultMessage analysis(@RequestParam String data, @RequestParam String fileName) {
         System.out.println("fileName = " + fileName);
-        JSONObject dataParams = JSON.parseObject(data);
-        String author = dataParams.getString("Author");
-        System.out.println("作者："+ author +" 存在状态："+authorService.isExistsAuthor(author));
+//        JSONObject dataParams = JSON.parseObject(data);
+//        String author = dataParams.getString("Author");
+//        System.out.println("作者："+ author +" 存在状态："+authorService.isExistsAuthor(author));
 //        try {
 //            Thread.sleep(1000);
 //        } catch (InterruptedException e) {

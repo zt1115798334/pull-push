@@ -52,9 +52,9 @@ custom:
   es:
     version: 5
     page-size: 500
-    file-path: E:\\test2
-    read-model: DB
-    analysis: http://114.55.145.196:8484
+    file-path: D:\\test2
+    read-model: File
+    analysis: http://127.0.0.1:8081
     search-type: EXACT
     es5: #es配置信息
       key: yq_test

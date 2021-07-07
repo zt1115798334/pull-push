@@ -8,10 +8,8 @@ import com.example.pullpush.mysql.entity.ArticleFile;
 import com.example.pullpush.mysql.service.ArticleFileService;
 import com.example.pullpush.properties.EsProperties;
 import com.example.pullpush.service.PushService;
-import com.example.pullpush.service.callable.SendDbInInterface;
 import com.example.pullpush.service.callable.SendInInterface;
 import com.example.pullpush.utils.FileUtils;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +35,8 @@ public class PushServiceImpl implements PushService {
     private final AnalysisService analysisService;
 
     private final ArticleFileService articleFileService;
+    private final Queue<Long> queueSend = new ConcurrentLinkedQueue<>();
+    private final Queue<FileInfoDto> queueRead = new ConcurrentLinkedQueue<>();
 
     @Override
     public void start() {
@@ -109,49 +109,63 @@ public class PushServiceImpl implements PushService {
 
     }
 
-    public void readFile() {
-        Queue<FileInfoDto> queueRead = new ConcurrentLinkedQueue<>();
-        FileUtils txt = new FileUtils(esProperties.getFilePath(), "txt");
+    public void readFileContent() {
+        final ExecutorService executorServiceReadSendFile = Executors.newFixedThreadPool(15);
+        FileUtils txt = new FileUtils(esProperties.getFilePath(), "");
         txt.File();
         List<File> fileList = txt.getFileList().stream().filter(Objects::nonNull).collect(Collectors.toList());
         int fileSize = fileList.size();
         log.info("文件总数为：" + fileSize);
 
-
-        final ExecutorService executorServiceReadSendFile = Executors.newFixedThreadPool(15);
-        new Thread(() -> {
-            try {
-                for (File file : fileList) {
-                    Future<FileInfoDto> submit = executorServiceReadSendFile.submit(new ReadFile(file));
-                    queueRead.add(submit.get());
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+        try {
+            for (File file : fileList) {
+                Future<FileInfoDto> submit = executorServiceReadSendFile.submit(new ReadFile(file));
+                queueRead.add(submit.get());
+                Thread.sleep(100);
             }
-        }).start();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
 
-        Queue<Long> queueSend = new ConcurrentLinkedQueue<>();
-        RateLimiter rateLimiter = RateLimiter.create(100);
-        new Thread(() -> {
-            try {
-                while (true) {
-                    while (!queueRead.isEmpty()) {
-                        FileInfoDto poll = queueRead.poll();
-                        Future<Long> submit = executorServiceReadSendFile.submit(new SendInInterface(rateLimiter, analysisService, poll));
-                        queueSend.add(submit.get());
-                    }
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-        }).start();
         executorServiceReadSendFile.shutdown();
         while (true) {
-            if (executorServiceReadSendFile.isTerminated()) {
-                System.out.println("所有的子线程都结束了！");
+            if (!executorServiceReadSendFile.isTerminated()) {
+                System.out.println("readFileContent的子线程都结束了！");
                 break;
             }
         }
+    }
+
+    public void sendFileContent() {
+        RateLimiter rateLimiter = RateLimiter.create(100);
+        final ExecutorService executorServiceReadSendFile = Executors.newFixedThreadPool(15);
+        try {
+            while (true) {
+                while (!queueRead.isEmpty()) {
+                    FileInfoDto poll = queueRead.poll();
+                    Future<Long> submit = executorServiceReadSendFile.submit(new SendInInterface(rateLimiter, analysisService, poll));
+                    queueSend.add(submit.get());
+                }
+                Thread.sleep(100);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        executorServiceReadSendFile.shutdown();
+        while (true) {
+            if (!executorServiceReadSendFile.isTerminated()) {
+                System.out.println("sendFileContent的子线程都结束了！");
+                break;
+            }
+        }
+    }
+
+    public void readFile() {
+        new Thread(this::readFileContent).start();
+
+        new Thread(this::sendFileContent).start();
+
     }
 
     @AllArgsConstructor

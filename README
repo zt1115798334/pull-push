@@ -1,6 +1,6 @@
 startDate endDate 开始时间结束时间需要自己修改
 自定义词获取文章到本地
-curl -X GET "http://localhost:8080/api/pullArticleOfCustomWords?startDate=2021-04-06&endDate=2021-04-07&storageMode=LOCAL"
+curl -X GET "http://localhost:8080/api/pullArticleOfCustomWords?startDate=2021-07-01&endDate=2021-07-05&storageMode=LOCAL"
 自定义词获取文章到分析接口
 curl -X GET "http://localhost:8087/api/pullArticleOfCustomWords?startDate=2021-05-01&endDate=2021-05-10&storageMode=INTERFACE"
 自定义词获取文章到分析接口
