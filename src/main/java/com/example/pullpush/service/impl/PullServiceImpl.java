@@ -136,7 +136,8 @@ public class PullServiceImpl implements PullService {
                 List<EsArticle> articleList = allDataEsArticlePage.getList();
                 int articleSize = articleList.size();
                 atomicLong.addAndGet(articleSize);
-                if (allDataEsArticlePage.getTotalElements() == 0 || articleSize == 0) {
+                System.out.println("atomicLong = " + atomicLong.get());
+                if (allDataEsArticlePage.getTotalElements() == 0 || articleSize == 0 || atomicLong.get() > 20000) {
                     break;
                 }
                 RateLimiter rateLimiter = RateLimiter.create(100);

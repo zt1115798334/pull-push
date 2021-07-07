@@ -23,3 +23,29 @@ services:
       - /etc/localtime:/etc/localtime:rw
     ports:
       - '3307:3306'
+  mysql-nacos:
+    container_name: mysql-nacos
+    image: nacos/nacos-mysql:8.0.16
+    env_file:
+      - ./mysql-nacos/env/mysql-nacos.env
+    volumes:
+      - ./mysql-nacos/db:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    networks:
+      - nacos
+  nacos:
+    image: nacos/nacos-server
+    container_name: nacos
+    env_file:
+      - ./nacos/env/nacos.env
+    volumes:
+      - ./nacos/logs/:/home/nacos/logs
+    #      - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
+    ports:
+      - "8848:8848"
+      - "9555:9555"
+    networks:
+      - nacos
+    depends_on:
+      - mysql-nacos

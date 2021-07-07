@@ -14,6 +14,7 @@ import com.example.pullpush.properties.EsProperties;
 import com.example.pullpush.utils.ArticleUtils;
 import com.example.pullpush.utils.EsParamsUtils;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -89,6 +90,9 @@ public class EsArticleServiceImpl implements EsArticleService {
         JSONObject params = new JSONObject();
         if (Objects.equal(searchModel, SearchModel.RELATED_WORDS)) {
             if (Objects.equal(esProperties.getSearchType(), SearchType.EXACT)) {
+//                List<JSONObject> jo = Lists.newArrayList();
+//                jo.add(EsParamsUtils.getQueryRelatedWordsParams(wordJa));
+//                params.put("queryParams", jo);
                 params.putAll(EsParamsUtils.getQueryRelatedWordsParams(wordJa));
             } else {
                 params.putAll(EsParamsUtils.getQuerySearchValueParams(wordJa));

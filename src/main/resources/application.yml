@@ -36,10 +36,7 @@ spring:
 custom:
   custom-word:
     word:
-      - 中印冲突,中印关系,中印*边境*冲突,中印*边境*对峙,中印*边界*冲突,中印*边界*对峙
-      - 中美关系,拜登*对华态度,拜登*谴责中国,拜登*指责中国,中美双边关系
-      - 后新冠,新冠疫苗*(普及+接种+研发+副作用+有效期+上市+有效+上新+试验+注册+抢跑+打不打+不建议打+不打+不良反应+不能打+获批+临床+研究+投入使用)
-      - 美国*新冠,美国*肺炎,美国*疫情
+      - 新冠肺炎,肺炎疫情,新型冠状病毒,肺炎病例,肺炎确诊,新冠疫苗,新冠肺炎疫苗,建党百年
     author:
       - 吉林教育
       - 新疆教育厅
@@ -55,14 +52,15 @@ custom:
   es:
     version: 5
     page-size: 500
-    file-path: D:\\test
+    file-path: E:\\test2
     read-model: DB
     analysis: http://114.55.145.196:8484
     search-type: EXACT
     es5: #es配置信息
-      key: yq_yuzhong
-#      host: http://river.junquan.com.cn
-      host: http://124.70.111.118:80
+      key: yq_test
+#      key: yq_zkdj
+      host: http://river.junquan.com.cn
+#      host: http://124.70.111.118:80
       app-id: 1231231
       full-query: /river/river/dataQuery
 #      full-query: /restserver/river/dataQuery
