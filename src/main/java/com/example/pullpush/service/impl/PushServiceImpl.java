@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +39,7 @@ public class PushServiceImpl implements PushService {
     private final ArticleFileService articleFileService;
     private final Queue<Long> queueSend = new ConcurrentLinkedQueue<>();
     private final Queue<FileInfoDto> queueRead = new ConcurrentLinkedQueue<>();
+    private static volatile Integer fileSize = 0;
 
     @Override
     public void start() {
@@ -111,16 +114,20 @@ public class PushServiceImpl implements PushService {
 
     public void readFileContent() {
         final ExecutorService executorServiceReadSendFile = Executors.newFixedThreadPool(15);
+        log.info("开始获取文件啦！！");
         FileUtils txt = new FileUtils(esProperties.getFilePath(), "");
         txt.File();
         List<File> fileList = txt.getFileList().stream().filter(Objects::nonNull).collect(Collectors.toList());
-        int fileSize = fileList.size();
+        fileSize = fileList.size();
         log.info("文件总数为：" + fileSize);
+        AtomicInteger atomicInteger = new AtomicInteger();
 
         try {
             for (File file : fileList) {
                 Future<FileInfoDto> submit = executorServiceReadSendFile.submit(new ReadFile(file));
                 queueRead.add(submit.get());
+                int i = atomicInteger.incrementAndGet();
+                log.info("文件总数为：{}，当前获取到第{}个，完成度：{}%", fileSize, i, percentage(fileSize, i));
                 Thread.sleep(100);
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -139,11 +146,14 @@ public class PushServiceImpl implements PushService {
     public void sendFileContent() {
         RateLimiter rateLimiter = RateLimiter.create(100);
         final ExecutorService executorServiceReadSendFile = Executors.newFixedThreadPool(15);
+        AtomicInteger atomicInteger = new AtomicInteger();
         try {
             while (true) {
                 while (!queueRead.isEmpty()) {
                     FileInfoDto poll = queueRead.poll();
                     Future<Long> submit = executorServiceReadSendFile.submit(new SendInInterface(rateLimiter, analysisService, poll));
+                    int i = atomicInteger.incrementAndGet();
+                    log.info("文件总数为：{}，正在发送第{}个，完成度：{}%", fileSize, i, percentage(fileSize, i));
                     queueSend.add(submit.get());
                 }
                 Thread.sleep(100);
@@ -180,15 +190,6 @@ public class PushServiceImpl implements PushService {
         }
     }
 
-    public static void main(String[] args) {
-        File f = new File("E:\\1122");//获取路径  F:\测试目录
-        File[] files = f.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File file = files[i];
-            String s = file.getName().split("_")[0];
-            System.out.print("ID = " + s + " or ");
-        }
-    }
 
     public static void moreThread() {
         StringBuilder sb = new StringBuilder("19700101_5cb843af8e45baaf49a69486032b4dc5");
@@ -198,4 +199,14 @@ public class PushServiceImpl implements PushService {
         System.out.println("Profession = " + sb.toString());
     }
 
+
+    public static String percentage(long total, long count) {
+        BigDecimal totalBigDecimal = new BigDecimal(total);
+        BigDecimal countBigDecimal = new BigDecimal(count);
+        return countBigDecimal.divide(totalBigDecimal, 6, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)).toString();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(percentage(1532924, 532924));
+    }
 }
