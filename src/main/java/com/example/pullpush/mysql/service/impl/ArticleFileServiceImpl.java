@@ -29,6 +29,6 @@ public class ArticleFileServiceImpl implements ArticleFileService {
     @Override
     public void truncateTable() {
         System.out.println("开始清理表信息");
-//        articleFileRepository.truncateTable();
+        articleFileRepository.truncateTable();
     }
 }

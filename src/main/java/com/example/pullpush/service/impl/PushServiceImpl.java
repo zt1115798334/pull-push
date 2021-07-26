@@ -150,6 +150,7 @@ public class PushServiceImpl implements PushService {
         try {
             while (true) {
                 while (!queueRead.isEmpty()) {
+                    log.info("当前队列数量：{}", queueRead.size());
                     FileInfoDto poll = queueRead.poll();
                     Future<Long> submit = executorServiceReadSendFile.submit(new SendInInterface(rateLimiter, analysisService, poll));
                     int i = atomicInteger.incrementAndGet();
