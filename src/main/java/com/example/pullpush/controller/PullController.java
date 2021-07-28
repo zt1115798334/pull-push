@@ -8,13 +8,11 @@ import com.example.pullpush.handler.SyncPullArticleHandler;
 import com.example.pullpush.utils.DateUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,6 +29,9 @@ public class PullController extends BaseResultMessage {
 
     @Resource(name = "customWordsByDateRange")
     private final SyncPullArticleHandler.CustomWordsByDateRange customWordsByDateRange;
+
+    @Resource(name = "queryWordsByDateRange")
+    private final SyncPullArticleHandler.QueryWordsByDateRange queryWordsByDateRange;
 
     @Resource(name = "gatherWordsByDateRange")
     private final SyncPullArticleHandler.GatherWordsByDateRange gatherWordsByDateRange;
@@ -54,6 +55,23 @@ public class PullController extends BaseResultMessage {
         long handlerData = customWordsByDateRange.handlerData(extraParams);
         return success(handlerData);
     }
+
+    @PostMapping("pullArticleOfQueryWords")
+    public ResultMessage pullArticleOfQueryWords(@DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
+                                                 @RequestParam LocalDate startDate,
+                                                 @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
+                                                 @RequestParam LocalDate endDate,
+                                                 @RequestParam StorageMode storageMode,
+                                                 @RequestParam List<String> queryWords) {
+        JSONObject extraParams = new JSONObject();
+        extraParams.put("storageMode", storageMode);
+        extraParams.put("startDate", startDate);
+        extraParams.put("endDate", endDate);
+        extraParams.put("queryWords", queryWords);
+        long handlerData = queryWordsByDateRange.handlerData(extraParams);
+        return success(handlerData);
+    }
+
 
     @GetMapping("pullArticleOfGatherWords")
     public ResultMessage pullArticleOfGatherWords(@DateTimeFormat(pattern = DateUtils.DATE_FORMAT)

@@ -1,5 +1,6 @@
 package com.example.pullpush.handler;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.pullpush.base.handler.page.PageHandler;
 import com.example.pullpush.custom.RichParameters;
@@ -52,6 +53,31 @@ public class SyncPullArticleHandler {
                     .carrier(customWordProperties.getCarrier())
                     .build();
             return pullEsArticle.pullEsArticleByDateRange(richParameters, authors, startDate, endDate);
+        }
+    }
+
+    @Component("queryWordsByDateRange")
+    @AllArgsConstructor
+    public static class QueryWordsByDateRange {
+
+        private final PullService pullEsArticle;
+
+        public long handlerData(JSONObject extraParams) {
+            log.info("extraParams:{}", extraParams.toJSONString());
+            StorageMode storageMode = extraParams.getObject("storageMode", StorageMode.class);
+            LocalDate startDate = extraParams.getObject("startDate", LocalDate.class);
+            LocalDate endDate = extraParams.getObject("endDate", LocalDate.class);
+            JSONArray queryWords = extraParams.getJSONArray("queryWords");
+            List<String> gatherWords =queryWords.stream().map(String::valueOf)
+                    .map(MStringUtils::splitMinGranularityStr)
+                    .flatMap(Collection::stream)
+                    .distinct().collect(Collectors.toList());
+            RichParameters richParameters = RichParameters.builder()
+                    .storageMode(storageMode)
+                    .searchModel(SearchModel.RELATED_WORDS)
+                    .fromType("custom")
+                    .build();
+            return pullEsArticle.pullEsArticleByDateRange(richParameters, gatherWords, startDate, endDate);
         }
     }
 
@@ -149,7 +175,6 @@ public class SyncPullArticleHandler {
             }
         }
     }
-
 
     @Component("customAuthorsByTimeRange")
     @AllArgsConstructor

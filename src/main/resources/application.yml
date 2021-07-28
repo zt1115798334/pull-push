@@ -57,8 +57,8 @@ custom:
     analysis: http://127.0.0.1:8081
     search-type: EXACT
     es5: #es配置信息
-      key: yq_test
-#      key: yq_zkdj
+#      key: yq_test
+      key: yq_zkdj
       host: http://river.junquan.com.cn
 #      host: http://124.70.111.118:80
       app-id: 1231231
