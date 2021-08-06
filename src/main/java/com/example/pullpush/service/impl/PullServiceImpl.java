@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class PullServiceImpl implements PullService {
@@ -79,6 +80,7 @@ public class PullServiceImpl implements PullService {
      */
     @Override
     public long pullEsArticleByTimeRange(RichParameters richParameters, List<String> words, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        log.info("相关词数量为：{}", words.size());
         String fromType = richParameters.getFromType();
         ExecutorService executorService = Executors.newFixedThreadPool(3);
         JSONArray wordJa = JSONArray.parseArray(JSONArray.toJSONString(words));
@@ -137,7 +139,7 @@ public class PullServiceImpl implements PullService {
                 int articleSize = articleList.size();
                 atomicLong.addAndGet(articleSize);
                 System.out.println("atomicLong = " + atomicLong.get());
-                if (allDataEsArticlePage.getTotalElements() == 0 || articleSize == 0 ) {
+                if (allDataEsArticlePage.getTotalElements() == 0 || articleSize == 0) {
                     break;
                 }
                 RateLimiter rateLimiter = RateLimiter.create(100);

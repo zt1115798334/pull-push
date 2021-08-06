@@ -83,6 +83,6 @@ custom:
     job-Type:
 #      - CUSTOM_AUTHOR
 #      - CUSTOM_WORD
-      - GATHER_AUTHOR
+      - PUSH_ARTICLE
     #    true 开启  false 关闭
     state: false

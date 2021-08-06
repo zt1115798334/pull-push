@@ -6,6 +6,7 @@ import com.example.pullpush.base.controller.ResultMessage;
 import com.example.pullpush.enums.StorageMode;
 import com.example.pullpush.handler.SyncPullArticleHandler;
 import com.example.pullpush.utils.DateUtils;
+import com.example.pullpush.utils.MStringUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -62,12 +64,12 @@ public class PullController extends BaseResultMessage {
                                                  @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
                                                  @RequestParam LocalDate endDate,
                                                  @RequestParam StorageMode storageMode,
-                                                 @RequestParam List<String> queryWords) {
+                                                 @RequestParam String queryWords) {
         JSONObject extraParams = new JSONObject();
         extraParams.put("storageMode", storageMode);
         extraParams.put("startDate", startDate);
         extraParams.put("endDate", endDate);
-        extraParams.put("queryWords", queryWords);
+        extraParams.put("queryWords", MStringUtils.toDBC(queryWords).split(","));
         long handlerData = queryWordsByDateRange.handlerData(extraParams);
         return success(handlerData);
     }
@@ -118,4 +120,7 @@ public class PullController extends BaseResultMessage {
     }
 
 
+    public static void main(String[] args) {
+        System.out.println(MStringUtils.toDBC("两会*（教育经费+教师工资+教育支出）,代表*（教育经费+教师工资+教育支出）,委员*（教育经费+教师工资+教育支出）"));
+    }
 }

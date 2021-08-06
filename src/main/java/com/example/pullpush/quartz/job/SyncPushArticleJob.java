@@ -8,6 +8,7 @@ import com.example.pullpush.properties.QuartzProperties;
 import com.example.pullpush.service.PushService;
 import com.example.pullpush.utils.DateUtils;
 import com.google.common.base.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 @Component
 @EnableScheduling
 public class SyncPushArticleJob {
@@ -24,6 +26,7 @@ public class SyncPushArticleJob {
     private PushService pushService;
 
     public void execute() throws ExecutionException, InterruptedException {
+        log.info("执行 SyncPushArticleJob");
         pushService.start();
     }
 }

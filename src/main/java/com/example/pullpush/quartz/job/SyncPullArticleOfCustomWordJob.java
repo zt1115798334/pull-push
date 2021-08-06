@@ -29,6 +29,7 @@ public class SyncPullArticleOfCustomWordJob {
     private QuartzProperties quartzProperties;
 
     public void execute() {
+        log.info("执行 SyncPullArticleOfCustomWordJob");
         TimeType timeType = quartzProperties.getTimeType();
         Integer timeRange = quartzProperties.getTimeRange();
         long count;

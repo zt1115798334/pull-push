@@ -7,12 +7,14 @@ import com.example.pullpush.handler.SyncPullArticleHandler;
 import com.example.pullpush.properties.QuartzProperties;
 import com.example.pullpush.utils.DateUtils;
 import com.google.common.base.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
 
+@Slf4j
 @Component
 @EnableScheduling
 public class SyncPullArticleOfGatherAuthorJob {
@@ -27,6 +29,7 @@ public class SyncPullArticleOfGatherAuthorJob {
     private QuartzProperties quartzProperties;
 
     public void execute() {
+        log.info("执行 SyncPullArticleOfGatherAuthorJob");
         TimeType timeType = quartzProperties.getTimeType();
         Integer timeRange = quartzProperties.getTimeRange();
         DateUtils.DateRange dateRange = DateUtils.intervalTimeCoverTimeType(timeType, timeRange);

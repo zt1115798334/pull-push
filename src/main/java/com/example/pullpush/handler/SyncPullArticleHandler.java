@@ -291,11 +291,16 @@ public class SyncPullArticleHandler {
 
         @Override
         protected Page<GatherWordDto> getPageList(int pageNumber, JSONObject extraParams) {
-            if (extraParams.getBoolean("status")) {
+            if (extraParams.getBooleanValue("status")) {
                 return gatherWordsService.findPageByEntityStatus(1L, pageNumber, DEFAULT_BATCH_SIZE);
             } else {
                 return gatherWordsService.findPageByEntity(pageNumber, DEFAULT_BATCH_SIZE);
             }
         }
+    }
+
+    public static void main(String[] args) {
+        JSONObject j = new JSONObject();
+        System.out.println(j.getBoolean("dd"));
     }
 }

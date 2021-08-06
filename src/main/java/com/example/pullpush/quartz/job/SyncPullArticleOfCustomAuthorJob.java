@@ -28,6 +28,7 @@ public class SyncPullArticleOfCustomAuthorJob {
     private QuartzProperties quartzProperties;
 
     public void execute() {
+        log.info("执行 SyncPullArticleOfCustomAuthorJob");
         TimeType timeType = quartzProperties.getTimeType();
         Integer timeRange = quartzProperties.getTimeRange();
         long count;

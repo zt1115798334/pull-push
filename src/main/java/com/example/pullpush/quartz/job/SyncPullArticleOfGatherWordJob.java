@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Component
 @EnableScheduling
 public class SyncPullArticleOfGatherWordJob {
@@ -31,6 +32,7 @@ public class SyncPullArticleOfGatherWordJob {
     private QuartzProperties quartzProperties;
 
     public void execute() {
+        log.info("执行 SyncPullArticleOfGatherWordJob");
         TimeType timeType = quartzProperties.getTimeType();
         Integer timeRange = quartzProperties.getTimeRange();
         DateUtils.DateRange dateRange = DateUtils.intervalTimeCoverTimeType(timeType, timeRange);
@@ -47,7 +49,7 @@ public class SyncPullArticleOfGatherWordJob {
             extraParams.put("storageMode", StorageMode.INTERFACE);
             extraParams.put("startDateTime", dateRange.getStartDateTime());
             extraParams.put("endDateTime", dateRange.getEndDateTime());
-            extraParams.put("status", true);
+//            extraParams.put("status", true);
             extraParams.put("fromType", DateUtils.formatDate(LocalDate.now()));
             gatherWordsByTimeRange.handle(extraParams);
         }
