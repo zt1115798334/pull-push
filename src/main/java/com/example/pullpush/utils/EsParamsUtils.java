@@ -85,8 +85,8 @@ public class EsParamsUtils {
      */
     public static JSONObject getQueryTimeParams(LocalDateTime startTime, LocalDateTime endTime) {
         JSONObject csJo = new JSONObject();
-        csJo.put(ES_START_TIME, DateUtils.formatDateTime(startTime));
-        csJo.put(ES_END_TIME, DateUtils.formatDateTime(endTime));
+        csJo.put(ES_CREATE_START_TIME, DateUtils.formatDateTime(startTime));
+        csJo.put(ES_CREATE_END_TIME, DateUtils.formatDateTime(endTime));
         return csJo;
     }
 
